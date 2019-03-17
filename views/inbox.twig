@@ -1,0 +1,36 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script src="/javascripts/notifications.js"></script>
+    <script>
+        enableNewMessageNotifications('{{ address }}', true)
+    </script>
+
+
+    <div style="float: right"><a href="/login"> logout</a></div>
+    <h1>{{ address }}</h1>
+    {% for mail in mailSummaries %}
+        <a href="{{ mail.to[0].address }}/{{ mail.uid }}" class="no-link-color">
+            <blockquote class="email">
+                <h6 class="list-group-item-heading">
+                    {{ mail.from[0].name }}
+                    <span class="text-muted">{{ mail.from[0].address }}</span>
+                    <small class="float-right">{{ mail.date |date }}</small>
+                </h6>
+                <p class="list-group-item-text text-truncate" style="width: 75%">
+                    {{ mail.subject }} </p>
+                </div>
+
+            </blockquote>
+        </a>
+    {% endfor %}
+
+    {% if not mailSummaries %}
+        <blockquote>
+            There are not mails yet.
+        </blockquote>
+    {% endif %}
+
+
+{% endblock %}

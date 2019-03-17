@@ -1,0 +1,26 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+
+    <a class="button" href="/login/random">Login to random mailbox</a>
+
+    <h1>Sign in</h1>
+
+    {% if userInputError %}
+        <blockquote class="warning">
+            Your input was invalid. Please try other values.
+        </blockquote>
+    {% endif %}
+    <form method="POST" action="/login">
+        <fieldset>
+            <label for="nameField">Name</label>
+            <input type="text" id="nameField" name="username" value="{{ username }}">
+            <label for="commentField">Domain</label>
+            <select id="commentField" name="domain">
+                <option value="{{ domain }}">@{{ domain }}</option>
+            </select>
+            <input class="button-primary" type="submit" value="Login">
+        </fieldset>
+    </form>
+
+{% endblock %}
