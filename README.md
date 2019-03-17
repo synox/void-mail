@@ -24,6 +24,20 @@ TODO
 TODO
 
 
+## TODO
+
+-   reduce code base, if possible
+-   handle imap error (event emitter), handle reconnect
+-   error handling everywhere
+-   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
+-   provide config for fixed data for offline testing
+-   use loggers
+-   config to enable periodic refresh
+-   run ci integration
+
+- Reactive imap stream as lib
+- Imap ids only, more efficient
+
 ## License
 
 GPL © [Aravindo Wingeier](https://github.com/synox)
