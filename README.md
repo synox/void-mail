@@ -11,8 +11,11 @@
 
 
 ## Install
-Heroku: https://devcenter.heroku.com/articles/getting-started-with-nodejs?singlepage=true#set-up
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+
+Or manually: 
+- Install [Heroku CLI](https://devcenter.heroku.com/articles/getting-started-with-nodejs?singlepage=true#set-up)
 
 ```
 heroku login
@@ -21,7 +24,7 @@ git push heroku master
 TODO
 ```
 
-*Requires [Node.js 8](https://nodejs.org).*
+*Requires [Node.js 10](https://nodejs.org).*
 
 
 ## Usage
