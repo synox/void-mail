@@ -26,10 +26,16 @@ iframe {
 blockquote {
     border-left: .3rem solid #9b4dca;
 }
+
 blockquote.warning {
     border-left: .3rem solid #ca5414;
 }
 
 text-muted {
     color: gray;
+}
+
+.footer {
+    margin-bottom: 2%;
+    text-align: center
 }

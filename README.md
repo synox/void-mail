@@ -23,6 +23,7 @@ Or manually:
 
 ```
 git clone https://github.com/synox/void-mail.git && cd void-mail
+npm install
 heroku login
 heroku create
 git push heroku master

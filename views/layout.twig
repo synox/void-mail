@@ -11,5 +11,25 @@
   </head>
   <body>
     {% block body %}{% endblock %}
+
+    {% block footer %}
+    <section class="container footer">
+      <hr>
+      <img src="/images/logo.gif" class="logo" title="void email" style="max-width: 100px">
+
+      <h4>simple disposable emails</h4>
+
+      <div class="row">
+        <div class="column">
+          <a href="https://github.com/synox/void-mail" target="_blank">Github</a>
+        </div>
+        <div class="column">
+          <a target="_blank" href="https://github.com/synox/void-mail/blob/master/docs/faq.md">FAQ</a>
+        </div>
+      </div>
+    </section>
+    {% endblock %}
+
+
   </body>
 </html>
