@@ -51,6 +51,13 @@ TODO
 - Reactive imap stream as lib
 - Imap ids only, more efficient
 
+## Team
+
+[![Aravindo Wingeier](https://github.com/synox.png?size=130)](https://github.com/synox) 
+---|---|---
+[Aravindo Wingeier](https://github.com/synox) 
+
+
 ## License
 
 GPL © [Aravindo Wingeier](https://github.com/synox)
