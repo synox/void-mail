@@ -46,6 +46,7 @@ Features:
 - Imap ids only, more efficient
 - Reactive imap stream as lib
 -  better random names
+- delete mails after X days.
 
 Cleanup:
 -   reduce code base, if possible
