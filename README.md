@@ -54,7 +54,7 @@ TODO
 ## Team
 
 [![Aravindo Wingeier](https://github.com/synox.png?size=130)](https://github.com/synox) 
----|---|---
+---
 [Aravindo Wingeier](https://github.com/synox) 
 
 
