@@ -41,21 +41,27 @@ TODO
 
 
 ## TODO
-
+Features:
+- Imap ids only, more efficient
+- Reactive imap stream as lib
 -  better random names
+
+Cleanup:
 -   reduce code base, if possible
 -   handle imap error (event emitter), handle reconnect
 -   error handling everywhere
 -   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
--   provide config for fixed data for offline testing
 -   use loggers
--   config to enable periodic refresh
--   run ci integration
-- heroku deployment
+
+Testing:
+-   provide config for fixed data for offline testing
+-   create tests
+
+Later:
 - docker deployment
 
-- Reactive imap stream as lib
-- Imap ids only, more efficient
+
+
 
 ## Team
 
