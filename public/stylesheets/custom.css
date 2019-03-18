@@ -1,7 +1,12 @@
 body {
-    padding: 50px;
+    padding: 50px 50px 10px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
-
+main {
+    flex: 1; /* keep footer at the bottom */
+}
 a {
     /*color: #00B7FF;*/
 }
@@ -36,6 +41,5 @@ text-muted {
 }
 
 .footer {
-    margin-bottom: 2%;
     text-align: center
 }
