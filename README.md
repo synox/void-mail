@@ -11,8 +11,13 @@
 
 
 ## Install
+Heroku: https://devcenter.heroku.com/articles/getting-started-with-nodejs?singlepage=true#set-up
+
 
 ```
+heroku login
+heroku create
+git push heroku master
 TODO
 ```
 
@@ -34,6 +39,8 @@ TODO
 -   use loggers
 -   config to enable periodic refresh
 -   run ci integration
+- heroku deployment
+- docker deployment
 
 - Reactive imap stream as lib
 - Imap ids only, more efficient
