@@ -22,6 +22,7 @@ Or manually:
 - Install [Heroku CLI](https://devcenter.heroku.com/articles/getting-started-with-nodejs?singlepage=true#set-up)
 
 ```
+git clone https://github.com/synox/void-mail.git && cd void-mail
 heroku login
 heroku create
 git push heroku master
@@ -41,6 +42,7 @@ TODO
 
 ## TODO
 
+-  better random names
 -   reduce code base, if possible
 -   handle imap error (event emitter), handle reconnect
 -   error handling everywhere
