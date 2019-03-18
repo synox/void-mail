@@ -49,6 +49,7 @@ Features:
 - delete mails after X days.
 
 Cleanup:
+- test for XSS sec issues
 -   reduce code base, if possible
 -   handle imap error (event emitter), handle reconnect
 -   error handling everywhere
