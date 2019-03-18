@@ -14,6 +14,7 @@
 
 
 ## Install
+One click installation: 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 
@@ -24,7 +25,10 @@ Or manually:
 heroku login
 heroku create
 git push heroku master
-TODO
+heroku config:set DOMAIN=example.com
+heroku config:set IMAP_SERVER=imap.example.com IMAP_USER=james IMAP_PASSWORD=Mypassword
+heroku config:set IMAP_REFRESH_INTERVAL_SECONDS=null
+heroku open
 ```
 
 *Requires [Node.js 10](https://nodejs.org).*
