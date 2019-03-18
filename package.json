@@ -32,5 +32,8 @@
   "xo": {
     "space": true,
     "semicolon": false
+  },
+  "engines": {
+    "node": "10.x"
   }
 }
