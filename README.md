@@ -9,6 +9,7 @@
 
 > a simple and fast disposable mail service that works directly with your imap server. No database required. 
 
+[![Build Status](https://travis-ci.org/synox/void-mail.svg?branch=master)](https://travis-ci.org/synox/void-mail)
 
 ## Install
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
