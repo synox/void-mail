@@ -27,7 +27,7 @@ router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, next) => {
 
 router.get('^/:address/:uid([0-9]+$)', sanitizeAddress, (req, res, next) => {
   req.app.get('emailManager')
-    .getMail(req.params.address, req.params.uid)
+    .getOneFullMail(req.params.address, req.params.uid)
     .then(mail => {
       if (mail) {
         res.render('mail', {title: req.params.address, address: req.params.address, mail})

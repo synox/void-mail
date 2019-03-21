@@ -23,24 +23,8 @@ class EmailStore {
     return this.mailSummaries.values()
   }
 
-  updateSummariesAndReturnNewMails(headersOnlyMails) {
-    const newMailSummaries = new MultiMap()
-
-    headersOnlyMails.forEach(mail => {
-      mail.to.forEach(recipient =>
-        newMailSummaries.set(recipient.address, mail)
-      )
-    })
-
-    // Find which mails are new in order to only notify affected users
-    const before = this.mailSummaries.values()
-    const after = newMailSummaries.values()
-    const newMails = _.differenceBy([...after], [...before], mail => mail.uid)
-
-    this.mailSummaries = newMailSummaries
-    console.log(`loaded ${headersOnlyMails.length} mail summaries`)
-
-    return newMails
+  add(to, mailSummary){
+    this.mailSummaries.set(to, mailSummary)
   }
 }
 

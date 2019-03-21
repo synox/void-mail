@@ -12,78 +12,138 @@ const _ = require('lodash')
  * TODO: handle connection problems,  connection losses and reconnection
  */
 class ImapFetcher extends EventEmitter {
-  constructor(config) {
-    super()
-    this.config = config
-    this.connectionPromise = null
-  }
-
-  async connect() {
-    const configWithListener = {
-      ...this.config,
-      // 'onmail' adds a callback when new mails arrive. With this we can keep the imap refresh interval very low (or even disable it).
-      onmail: numNewMail => {
-        this.emit('newmail')
-      }
-
-    }
-    return this.connectionPromise = imaps.connect(configWithListener)
-  }
-
-  async fetchAllMailSummaries() {
-    const searchCriteria = ['ALL']
-    const fetchOptions = {
-      bodies: ['HEADER'],
-      markSeen: false
-    }
-    const connection = await this.connectionPromise
-    await connection.openBox('INBOX')
-    const messages = await connection.search(searchCriteria, fetchOptions)
-    return messages.map(message => this.createMailSummary(message))
-  }
-
-  createMailSummary(message) {
-    const headerPart = _.find(message.parts, {which: 'HEADER'})
-    const to = headerPart.body.to.flatMap(to => addressparser(to))
-    const from = headerPart.body.from.flatMap(from => addressparser(from))
-    const subject = headerPart.body.subject[0]
-    const date = headerPart.body.date[0]
-    const {uid} = message.attributes
-
-    return {
-      raw: message,
-      to,
-      from,
-      date,
-      subject,
-      uid
-    }
-  }
-
-  async fetchFullMail(to, uid) {
-    console.log(`fetching message ${uid}`)
-    const searchCriteria = [
-      ['UID', uid],
-      ['TO', to]
-    ]
-    const fetchOptions = {
-      bodies: ['HEADER', ''], // '' means full body
-      markSeen: false
+    constructor(config) {
+        super()
+        this.config = config
+        this.loadedUids = new Set()
+        this.connection = null
     }
 
-    const connection = await this.connectionPromise
-    await connection.openBox('INBOX')
-    const messages = await connection.search(searchCriteria, fetchOptions)
-    if (messages.length == 0) {
-      throw new Error('email not found')
+    async connectAndLoad() {
+        const configWithListener = {
+            ...this.config,
+            // 'onmail' adds a callback when new mails arrive. With this we can keep the imap refresh interval very low (or even disable it).
+            onmail: () => this._loadMailSummariesAndPublish()
+        }
+        this.connection = await imaps.connect(configWithListener);
+        await this.connection.openBox('INBOX')
+
+        // If the above trigger on new mails does not work reliable, we have to regularly check
+        // for new mails on the server. This is done only after all the mails have been loaded for the
+        // first time. (Note: set the refresh higher than the time it takes to download the mails).
+        if (this.config.imap.refreshIntervalSeconds) {
+            this.once('all mails loaded', () => {
+                setInterval(() => this._loadMailSummariesAndPublish(), this.config.imap.refreshIntervalSeconds * 1000)
+            })
+        }
+
+        // ASYNC, return call after connect
+        this._loadMailSummariesAndPublish();
+
+        return this.connection
+
+
     }
 
-    const all = _.find(messages[0].parts, {which: ''})
+    async _loadMailSummariesAndPublish() {
+        const uids = this._getAllUids()
+        const newUids = uids.filter(uid => !this.loadedUids.has(uid))
+        console.log('uids:', newUids)
 
-    const mail = await simpleParser(all.body)
-    mail.uid = uid
-    return mail
-  }
+        // optimize by fetching several messages (but not all) with one 'search' call.
+        const uidChunks = _.chunk(newUids, 10)
+        const fetchFunctions = uidChunks.map(uidChunk =>
+            // do not start the search now, just create the function.
+            () => this._getMailHeadersAndPublish(c, uidChunk)
+        )
+
+        await pSeries(fetchFunctions)
+        this.emit('all mails loaded')
+    }
+
+    addNewMailListener(cb) {
+        this.on('mail', cb)
+    }
+
+    _createMailSummary(message) {
+        const headerPart = _.find(message.parts, {which: 'HEADER'})
+        const to = headerPart.body.to.flatMap(to => addressparser(to))
+        const from = headerPart.body.from.flatMap(from => addressparser(from))
+        const subject = headerPart.body.subject[0]
+        const date = headerPart.body.date[0]
+        const {uid} = message.attributes
+
+        return {
+            raw: message,
+            to,
+            from,
+            date,
+            subject,
+            uid
+        }
+    }
+
+    async fetchOneFullMail(to, uid) {
+        console.log(`fetching message ${uid}`)
+        const searchCriteria = [
+            ['UID', uid],
+            ['TO', to]
+        ]
+        const fetchOptions = {
+            bodies: ['HEADER', ''], // '' means full body
+            markSeen: false
+        }
+
+        const connection = await this.connectionPromise
+        await connection.openBox('INBOX')
+        const messages = await connection.search(searchCriteria, fetchOptions)
+        if (messages.length == 0) {
+            throw new Error('email not found')
+        }
+
+        const all = _.find(messages[0].parts, {which: ''})
+
+        const mail = await simpleParser(all.body)
+        mail.uid = uid
+        return mail
+    }
+
+    async _getAllUids() {
+        const imapUnderlying = this.connection.imap;
+        return await new Promise(function (resolve, reject) {
+            imapUnderlying.search(['ALL'], function (err, uids) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                // get newest messages first, order DESC
+                resolve(uids.sort().reverse());
+            });
+        })
+    }
+
+
+    async _getMailHeadersAndPublish(connection, uids) {
+        try {
+            const messages = await this.getMailHeaders(uids, connection);
+            messages.forEach(mail => {
+                this.loadedUids.add(mail.attributes.uid)
+                return this.emit('mail', this._createMailSummary(mail));
+            })
+        } catch (e) {
+            console.error('can not fetch', e)
+            throw e
+        }
+    }
+
+
+    async getMailHeaders(uids, connection) {
+        console.log("fetching uid", uids)
+        const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: false};
+        const searchCriteria = [['UID', ...uids]]
+        return await connection.search(searchCriteria, fetchOptions);
+    }
+
 }
 
 module.exports = ImapFetcher
