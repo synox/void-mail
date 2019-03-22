@@ -33,7 +33,8 @@ class ImapFetcher extends EventEmitter {
                 }
             }
         }
-        this.connection = await imaps.connect(configWithListener);
+        this.connectionPromise = await imaps.connect(configWithListener);
+        this.connection = await this.connectionPromise;
         await this.connection.openBox('INBOX')
 
         // If the above trigger on new mails does not work reliable, we have to regularly check
@@ -94,19 +95,23 @@ class ImapFetcher extends EventEmitter {
     }
 
     async fetchOneFullMail(to, uid) {
+        // wait until the connection is established
+        if(!this.connection){
+            throw {message: 'imap connection not ready', status: 503}
+        }
+
         console.log(`fetching full message ${uid}`)
         const searchCriteria = [
             ['UID', uid],
             ['TO', to]
         ]
         const fetchOptions = {
-            bodies: ['HEADER', ''], // '' means full body
+            bodies: ['HEADER',
+                ''], // '' means full body
             markSeen: false
         }
 
-        const connection = await this.connectionPromise
-        await connection.openBox('INBOX')
-        const messages = await connection.search(searchCriteria, fetchOptions)
+        const messages = await this.connection.search(searchCriteria, fetchOptions)
         if (messages.length == 0) {
             throw new Error('email not found')
         }

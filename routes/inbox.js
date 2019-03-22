@@ -36,7 +36,8 @@ router.get('^/:address/:uid([0-9]+$)', sanitizeAddress, (req, res, next) => {
       }
     })
     .catch(error => {
-      next({message: error, status: 404})
+      console.error('error while fetching one email', error)
+      next({message: error.message, status: error.status})
     })
 })
 

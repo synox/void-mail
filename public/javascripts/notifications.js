@@ -10,7 +10,7 @@ function enableNewMessageNotifications(address, reloadPage) {
     const notif = new Notification(
       address, {
         body: 'You have new messages',
-        icon: '/images/icon.jpg'
+        icon: '/images/logo.gif'
       })
     notif.addEventListener('click', event => {
       window.focus()
