@@ -44,11 +44,16 @@ class ImapFetcher extends EventEmitter {
             }, {
                 retries: 5
             })
-
         } catch (err) {
             console.error('can not connect, even with retry, stop app', err)
             process.exit(1)
         }
+        this.connection.on('error', err => {
+                console.error('got fatal error during imap operation, stop app.', err)
+                process.exit(2)
+            }
+        )
+        console.log('connected to imap')
 
         // If the above trigger on new mails does not work reliable, we have to regularly check
         // for new mails on the server. This is done only after all the mails have been loaded for the
