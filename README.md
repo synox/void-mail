@@ -42,26 +42,28 @@ TODO
 
 
 ## TODO
-- delete mails after X days.
-
-Features:
-- Reactive imap stream as lib
-- better random names
 
 Cleanup:
-- test for XSS sec issues
--   reduce code base, if possible
 -   handle imap error (event emitter), handle reconnect
 -   error handling everywhere
--   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
+-   test for XSS sec issues
 -   use loggers
+-   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
+-   make notifications better
+-   reduce code base, if possible
+
+Features:
+- better random names
+- delete mails after X days.
+
 
 Testing:
 -   provide config for fixed data for offline testing
 -   create tests
 
-Later:
+Maybe Later:
 - docker deployment
+- Reactive imap stream as lib
 
 
 
