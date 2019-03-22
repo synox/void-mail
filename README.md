@@ -44,10 +44,8 @@ TODO
 ## TODO
 
 Cleanup:
--   handle imap error (event emitter), handle reconnect
 -   error handling everywhere
 -   test for XSS sec issues
--   use loggers
 -   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
 -   make notifications better
 -   reduce code base, if possible
