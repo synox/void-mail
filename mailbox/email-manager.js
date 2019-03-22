@@ -2,6 +2,7 @@ const _ = require('lodash')
 const mem = require('mem')
 const ImapFetcher = require('./imap-fetcher')
 const EmailStore = require('./email-store')
+const debug = require('debug')('void-mail:imap-manager')
 
 /**
  * Fetches mails from imap, caches them and provides methods to access them.
@@ -37,7 +38,7 @@ class EmailManager {
 
 
     _onNewMail(mail) {
-        console.log('new mail for', mail.to[0])
+        debug('new mail for', mail.to[0])
         mail.to.forEach(to => {
             this.store.add(to, mail)
             return this.clientNotification.emit(to);
@@ -49,7 +50,7 @@ class EmailManager {
         const fs = require('fs')
         fs.writeFile(filename, JSON.stringify(mails), err => {
             if (err) {
-                console.log('can not save mails to file', err)
+                console.error('can not save mails to file', err)
             }
         })
     }

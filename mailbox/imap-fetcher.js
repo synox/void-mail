@@ -4,6 +4,7 @@ const addressparser = require('nodemailer/lib/addressparser')
 const EventEmitter = require('events')
 const pSeries = require('p-series');
 const retry = require('async-retry')
+const debug = require('debug')('void-mail:imap')
 
 const _ = require('lodash')
 
@@ -53,7 +54,7 @@ class ImapFetcher extends EventEmitter {
                 process.exit(2)
             }
         )
-        console.log('connected to imap')
+        debug('connected to imap')
 
         // If the above trigger on new mails does not work reliable, we have to regularly check
         // for new mails on the server. This is done only after all the mails have been loaded for the
@@ -73,7 +74,7 @@ class ImapFetcher extends EventEmitter {
     async _loadMailSummariesAndPublish() {
         const uids = await this._getAllUids()
         const newUids = uids.filter(uid => !this.loadedUids.has(uid))
-        console.log('uids:', newUids)
+        debug('uids:', newUids)
 
         // optimize by fetching several messages (but not all) with one 'search' call.
         const uidChunks = _.chunk(newUids, 10)
@@ -116,7 +117,7 @@ class ImapFetcher extends EventEmitter {
             throw {message: 'imap connection not ready', status: 503}
         }
 
-        console.log(`fetching full message ${uid}`)
+        debug(`fetching full message ${uid}`)
         const searchCriteria = [
             ['UID', uid],
             ['TO', to]
@@ -157,20 +158,20 @@ class ImapFetcher extends EventEmitter {
     async _getMailHeadersAndPublish(uids) {
         try {
             const messages = await this._getMailHeaders(uids);
-            console.log('fetched uids: ', uids)
+            debug('fetched uids: ', uids)
             messages.forEach(mail => {
                 this.loadedUids.add(mail.attributes.uid)
                 return this.emit('mail', this._createMailSummary(mail));
             })
         } catch (e) {
-            console.error('can not fetch', e)
+            debug('can not fetch', e)
             throw e
         }
     }
 
 
     async _getMailHeaders(uids) {
-        console.log("fetching uid", uids)
+        debug("fetching uid", uids)
         const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: false};
         const searchCriteria = [['UID', ...uids]]
         return await this.connection.search(searchCriteria, fetchOptions);
