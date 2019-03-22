@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "array.prototype.flatmap": "^1.2.1",
+    "async-retry": "^1.2.3",
     "compression": "^1.7.3",
     "debug": "~2.6.9",
     "express": "~4.16.0",
@@ -21,6 +22,7 @@
     "mnemonist": "^0.27.2",
     "morgan": "~1.9.0",
     "nodemailer": "^5.1.1",
+    "p-series": "^2.0.0",
     "random-word": "^2.0.0",
     "sanitize-html": "^1.20.0",
     "socket.io": "^2.2.0",

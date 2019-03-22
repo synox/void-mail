@@ -3,6 +3,7 @@ const {simpleParser} = require('mailparser')
 const addressparser = require('nodemailer/lib/addressparser')
 const EventEmitter = require('events')
 const pSeries = require('p-series');
+const retry = require('async-retry')
 
 const _ = require('lodash')
 
@@ -33,9 +34,21 @@ class ImapFetcher extends EventEmitter {
                 }
             }
         }
-        this.connectionPromise = await imaps.connect(configWithListener);
-        this.connection = await this.connectionPromise;
-        await this.connection.openBox('INBOX')
+
+        try {
+            await retry(async bail => {
+                // if anything throws, we retry
+                this.connectionPromise = imaps.connect(configWithListener);
+                this.connection = await this.connectionPromise;
+                await this.connection.openBox('INBOX')
+            }, {
+                retries: 5
+            })
+
+        } catch (err) {
+            console.error('can not connect, even with retry, stop app', err)
+            process.exit(1)
+        }
 
         // If the above trigger on new mails does not work reliable, we have to regularly check
         // for new mails on the server. This is done only after all the mails have been loaded for the
@@ -50,8 +63,6 @@ class ImapFetcher extends EventEmitter {
         this._loadMailSummariesAndPublish();
 
         return this.connection
-
-
     }
 
     async _loadMailSummariesAndPublish() {
@@ -96,7 +107,7 @@ class ImapFetcher extends EventEmitter {
 
     async fetchOneFullMail(to, uid) {
         // wait until the connection is established
-        if(!this.connection){
+        if (!this.connection) {
             throw {message: 'imap connection not ready', status: 503}
         }
 
