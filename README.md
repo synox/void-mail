@@ -42,6 +42,9 @@ TODO
 
 
 ## TODO
+fix order by date
+
+
 Features:
 - Imap ids only, more efficient
 - Reactive imap stream as lib

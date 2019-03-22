@@ -12,7 +12,7 @@ router.get('/all', (req, res, next) => {
   res.render('inbox', {
     title: 'All Mailboxes',
     address: 'all mails',
-    mailSummaries: [...emailManager.getAllMailSummaries()]
+    mailSummaries: emailManager.getAllMailSummaries()
   })
 })
 

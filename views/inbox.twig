@@ -11,7 +11,7 @@
     <div style="float: right"><a href="/login"> logout</a></div>
     <h1>{{ address }}</h1>
     {% for mail in mailSummaries %}
-        <a href="{{ mail.to[0].address }}/{{ mail.uid }}" class="no-link-color">
+        <a href="{{ mail.to[0] }}/{{ mail.uid }}" class="no-link-color">
             <blockquote class="email">
                 <h6 class="list-group-item-heading">
                     {{ mail.from[0].name }}
@@ -28,7 +28,7 @@
 
     {% if not mailSummaries %}
         <blockquote>
-            There are not mails yet.
+            There are no mails yet.
         </blockquote>
     {% endif %}
 

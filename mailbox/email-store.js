@@ -8,24 +8,27 @@ const _ = require('lodash')
  * memory. It would be better to use Redis or Mongo to save this in a different process.
  */
 class EmailStore {
-  constructor() {
-    // https://yomguithereal.github.io/mnemonist/multi-map
-    this.mailSummaries = new MultiMap()
-  }
+    constructor() {
+        // https://yomguithereal.github.io/mnemonist/multi-map
+        this.mailSummaries = new MultiMap()
+    }
 
-  getMailSummariesFor(address) {
-    const mails = this.mailSummaries.get(address) || []
-    return _.orderBy(mails,
-      mail => Date.parse(mail.date), ['desc'])
-  }
+    getMailSummariesFor(address) {
+        const mails = this.mailSummaries.get(address) || []
+        return _.orderBy(mails,
+            mail => Date.parse(mail.date), ['desc'])
+    }
 
-  getAllMailSummaries() {
-    return this.mailSummaries.values()
-  }
+    getAllMailSummaries() {
+        const mails = [...this.mailSummaries.values()]
+        return _.orderBy(mails,
+            mail => Date.parse(mail.date), ['desc'])
 
-  add(to, mailSummary){
-    this.mailSummaries.set(to, mailSummary)
-  }
+    }
+
+    add(to, mailSummary) {
+        this.mailSummaries.set(to, mailSummary)
+    }
 }
 
 module.exports = EmailStore

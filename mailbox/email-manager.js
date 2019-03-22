@@ -36,16 +36,9 @@ class EmailManager {
     }
 
 
-    static findRecipientAddresses(emailSummary) {
-        const addressesWithDuplicates = emailSummary.mail.to
-            .map(addressObj => addressObj.address) // The address also contains the name, just keep the email
-        return _.uniq(addressesWithDuplicates) // There might be duplicates, because email-store keeps a separate copy for each recipient.
-    }
-
-
     _onNewMail(mail) {
-        const recipients = EmailManager.findRecipientAddresses(mail)
-        recipients.forEach(to => {
+        console.log('new mail for', mail.to[0])
+        mail.to.forEach(to => {
             this.store.add(to, mail)
             return this.clientNotification.emit(to);
         })

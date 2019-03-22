@@ -2,6 +2,7 @@ const imaps = require('imap-simple')
 const {simpleParser} = require('mailparser')
 const addressparser = require('nodemailer/lib/addressparser')
 const EventEmitter = require('events')
+const pSeries = require('p-series');
 
 const _ = require('lodash')
 
@@ -17,13 +18,20 @@ class ImapFetcher extends EventEmitter {
         this.config = config
         this.loadedUids = new Set()
         this.connection = null
+        this.initialLoadDone = false
     }
 
     async connectAndLoad() {
         const configWithListener = {
             ...this.config,
             // 'onmail' adds a callback when new mails arrive. With this we can keep the imap refresh interval very low (or even disable it).
-            onmail: () => this._loadMailSummariesAndPublish()
+            onmail: () => {
+                // only react to new mails after the initial load, otherwise it might load the same mails twice.
+                if (this.initialLoadDone) {
+
+                    return this._loadMailSummariesAndPublish();
+                }
+            }
         }
         this.connection = await imaps.connect(configWithListener);
         await this.connection.openBox('INBOX')
@@ -46,7 +54,7 @@ class ImapFetcher extends EventEmitter {
     }
 
     async _loadMailSummariesAndPublish() {
-        const uids = this._getAllUids()
+        const uids = await this._getAllUids()
         const newUids = uids.filter(uid => !this.loadedUids.has(uid))
         console.log('uids:', newUids)
 
@@ -54,10 +62,11 @@ class ImapFetcher extends EventEmitter {
         const uidChunks = _.chunk(newUids, 10)
         const fetchFunctions = uidChunks.map(uidChunk =>
             // do not start the search now, just create the function.
-            () => this._getMailHeadersAndPublish(c, uidChunk)
+            () => this._getMailHeadersAndPublish(uidChunk)
         )
 
         await pSeries(fetchFunctions)
+        this.initialLoadDone = true
         this.emit('all mails loaded')
     }
 
@@ -66,12 +75,13 @@ class ImapFetcher extends EventEmitter {
     }
 
     _createMailSummary(message) {
-        const headerPart = _.find(message.parts, {which: 'HEADER'})
-        const to = headerPart.body.to.flatMap(to => addressparser(to))
-        const from = headerPart.body.from.flatMap(from => addressparser(from))
-        const subject = headerPart.body.subject[0]
-        const date = headerPart.body.date[0]
-        const {uid} = message.attributes
+        const headerPart = message.parts[0].body
+        const to = headerPart.to.flatMap(to => addressparser(to))
+            .map(addressObj => addressObj.address) // The address also contains the name, just keep the email
+        const from = headerPart.from.flatMap(from => addressparser(from))
+        const subject = headerPart.subject[0]
+        const date = headerPart.date[0]
+        const uid = message.attributes.uid
 
         return {
             raw: message,
@@ -84,7 +94,7 @@ class ImapFetcher extends EventEmitter {
     }
 
     async fetchOneFullMail(to, uid) {
-        console.log(`fetching message ${uid}`)
+        console.log(`fetching full message ${uid}`)
         const searchCriteria = [
             ['UID', uid],
             ['TO', to]
@@ -123,9 +133,10 @@ class ImapFetcher extends EventEmitter {
     }
 
 
-    async _getMailHeadersAndPublish(connection, uids) {
+    async _getMailHeadersAndPublish(uids) {
         try {
-            const messages = await this.getMailHeaders(uids, connection);
+            const messages = await this._getMailHeaders(uids);
+            console.log('fetched uids: ', uids)
             messages.forEach(mail => {
                 this.loadedUids.add(mail.attributes.uid)
                 return this.emit('mail', this._createMailSummary(mail));
@@ -137,11 +148,11 @@ class ImapFetcher extends EventEmitter {
     }
 
 
-    async getMailHeaders(uids, connection) {
+    async _getMailHeaders(uids) {
         console.log("fetching uid", uids)
         const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: false};
         const searchCriteria = [['UID', ...uids]]
-        return await connection.search(searchCriteria, fetchOptions);
+        return await this.connection.search(searchCriteria, fetchOptions);
     }
 
 }
