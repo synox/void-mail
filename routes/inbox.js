@@ -5,6 +5,7 @@ const {sanitizeParam} = require('express-validator/filter')
 
 const sanitizeAddress = sanitizeParam('address').customSanitizer((value, {req}) => {
   return req.params.address.replace(/[^A-Za-z0-9_.+@-]/g, '') // Remove special characters
+      .toLowerCase()
 })
 
 router.get('/all', (req, res, next) => {

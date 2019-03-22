@@ -42,14 +42,11 @@ TODO
 
 
 ## TODO
-fix order by date
-
+- delete mails after X days.
 
 Features:
-- Imap ids only, more efficient
 - Reactive imap stream as lib
--  better random names
-- delete mails after X days.
+- better random names
 
 Cleanup:
 - test for XSS sec issues

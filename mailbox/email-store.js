@@ -27,7 +27,7 @@ class EmailStore {
     }
 
     add(to, mailSummary) {
-        this.mailSummaries.set(to, mailSummary)
+        this.mailSummaries.set(to.toLowerCase(), mailSummary)
     }
 }
 
