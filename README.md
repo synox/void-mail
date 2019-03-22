@@ -42,13 +42,13 @@ TODO
 
 
 ## TODO
+-   make notifications better, delay, collect, fix url
 
 Cleanup:
 -   error handling everywhere
--   test for XSS sec issues
 -   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
--   make notifications better
 -   reduce code base, if possible
+
 
 Features:
 - better random names

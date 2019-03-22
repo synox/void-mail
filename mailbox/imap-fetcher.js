@@ -36,6 +36,13 @@ class ImapFetcher extends EventEmitter {
             }
         }
 
+        this.once('all mails loaded', () => {
+            // during initial load we ignored new incoming emails. To catch up with those, we have to refresh
+            // the mails once after the initial load.
+            this._loadMailSummariesAndPublish()
+        })
+
+
         try {
             await retry(async bail => {
                 // if anything throws, we retry
@@ -65,6 +72,8 @@ class ImapFetcher extends EventEmitter {
             })
         }
 
+
+
         // ASYNC, return call after connect
         this._loadMailSummariesAndPublish();
 
@@ -74,7 +83,6 @@ class ImapFetcher extends EventEmitter {
     async _loadMailSummariesAndPublish() {
         const uids = await this._getAllUids()
         const newUids = uids.filter(uid => !this.loadedUids.has(uid))
-        debug('uids:', newUids)
 
         // optimize by fetching several messages (but not all) with one 'search' call.
         const uidChunks = _.chunk(newUids, 10)
