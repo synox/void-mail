@@ -1,8 +1,7 @@
-const _ = require('lodash')
+const debug = require('debug')('void-mail:imap-manager')
 const mem = require('mem')
 const ImapFetcher = require('./imap-fetcher')
 const EmailSummaryStore = require('./email-summary-store')
-const debug = require('debug')('void-mail:imap-manager')
 
 /**
  * Fetches mails from imap, caches them and provides methods to access them. Also notifies the users via websockets about

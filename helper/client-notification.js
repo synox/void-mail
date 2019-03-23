@@ -21,7 +21,7 @@ class ClientNotification extends EventEmitter {
     this.on(address, newMailListener)
 
     socket.on('disconnect', reason => {
-      debug(`client disconnect: ${address}`)
+      debug(`client disconnect: ${address} (${reason})`)
       this.removeListener(address, newMailListener)
     })
   }

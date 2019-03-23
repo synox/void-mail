@@ -15,13 +15,12 @@ const config = {
 }
 
 if (!config.imap.user || !config.imap.password || !config.imap.host) {
-  console.error('IMAP is not configured. Use IMAP_* ENV vars.')
-  process.exit(1)
+  throw new Error('IMAP is not configured. Use IMAP_* ENV vars.')
+
 }
 
 if (!config.email.domain) {
-  console.error('DOMAIN is not configured. Use ENV vars.')
-  process.exit(1)
+  throw new Error('DOMAIN is not configured. Use ENV vars.')
 }
 
 /**
