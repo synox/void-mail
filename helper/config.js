@@ -16,7 +16,6 @@ const config = {
 
 if (!config.imap.user || !config.imap.password || !config.imap.host) {
   throw new Error('IMAP is not configured. Use IMAP_* ENV vars.')
-
 }
 
 if (!config.email.domain) {

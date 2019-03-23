@@ -33,7 +33,7 @@ app.use(express.urlencoded({extended: false}))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'twig')
 app.set('twig options', {
-  autoescape: true
+    autoescape: true
 })
 
 // Application code:
@@ -47,7 +47,7 @@ const emailManager = new EmailManager(config, clientNotification)
 app.set('emailManager', emailManager)
 
 app.get('/', (req, res, next) => {
-  res.redirect('/login')
+    res.redirect('/login')
 })
 
 app.use('/login', loginRouter)
@@ -55,20 +55,25 @@ app.use('/', inboxRouter)
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
-  next({message: 'page not found', status: 404})
+    next({message: 'page not found', status: 404})
 })
 
 // Error handler
 app.use((err, req, res, next) => {
-  // Set locals, only providing error in development
-  res.locals.message = err.message
-  res.locals.error = req.app.get('env') === 'development' ? err : {}
+    // Set locals, only providing error in development
+    res.locals.message = err.message
+    res.locals.error = req.app.get('env') === 'development' ? err : {}
 
-  // Render the error page
-  res.status(err.status || 500)
-  res.render('error')
+    // Render the error page
+    res.status(err.status || 500)
+    res.render('error')
 })
 
 emailManager.connectImapAndAutorefresh()
+    .catch(err => {
+            console.error('fatal error from email manager', err)
+            return process.exit(1);
+        }
+    )
 
 module.exports = {app, server}

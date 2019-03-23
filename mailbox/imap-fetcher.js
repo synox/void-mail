@@ -55,7 +55,7 @@ class ImapFetcher extends EventEmitter {
       })
     } catch (error) {
       console.error('can not connect, even with retry, stop app', error)
-      process.exit(1)
+      throw error
     }
 
     this.connection.on('error', err => {
