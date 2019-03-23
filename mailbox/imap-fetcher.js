@@ -153,13 +153,13 @@ class ImapFetcher extends EventEmitter {
     }
 
     const fullBody = _.find(messages[0].parts, {which: ''})
-    return await simpleParser(fullBody.body)
+    return simpleParser(fullBody.body)
   }
 
   async _getAllUids() {
     // Imap-simple does not expose the underlying connection yet.
     const imapUnderlying = this.connection.imap
-    return await new Promise(((resolve, reject) => {
+    return new Promise(((resolve, reject) => {
       imapUnderlying.search(['ALL'], (err, uids) => {
         if (err) {
           reject(err)
@@ -190,7 +190,7 @@ class ImapFetcher extends EventEmitter {
     debug('fetching uid', uids)
     const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: false}
     const searchCriteria = [['UID', ...uids]]
-    return await this.connection.search(searchCriteria, fetchOptions)
+    return this.connection.search(searchCriteria, fetchOptions)
   }
 }
 
