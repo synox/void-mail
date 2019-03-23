@@ -9,27 +9,26 @@ const _ = require('lodash')
  * But we don't, because we try to keep things simple.
  */
 class EmailSummaryStore {
-    constructor() {
-        // MultiMap docs: https://yomguithereal.github.io/mnemonist/multi-map
-        this.mailSummaries = new MultiMap()
-    }
+  constructor() {
+    // MultiMap docs: https://yomguithereal.github.io/mnemonist/multi-map
+    this.mailSummaries = new MultiMap()
+  }
 
-    getForRecipient(address) {
-        const mails = this.mailSummaries.get(address) || []
-        return _.orderBy(mails,
-            mail => Date.parse(mail.date), ['desc'])
-    }
+  getForRecipient(address) {
+    const mails = this.mailSummaries.get(address) || []
+    return _.orderBy(mails,
+      mail => Date.parse(mail.date), ['desc'])
+  }
 
-    getAll() {
-        const mails = [...this.mailSummaries.values()]
-        return _.orderBy(mails,
-            mail => Date.parse(mail.date), ['desc'])
+  getAll() {
+    const mails = [...this.mailSummaries.values()]
+    return _.orderBy(mails,
+      mail => Date.parse(mail.date), ['desc'])
+  }
 
-    }
-
-    add(to, mailSummary) {
-        this.mailSummaries.set(to.toLowerCase(), mailSummary)
-    }
+  add(to, mailSummary) {
+    this.mailSummaries.set(to.toLowerCase(), mailSummary)
+  }
 }
 
 module.exports = EmailSummaryStore
