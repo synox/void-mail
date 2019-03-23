@@ -122,7 +122,7 @@ class ImapFetcher extends EventEmitter {
     async fetchOneFullMail(to, uid) {
         // wait until the connection is established
         if (!this.connection) {
-            throw {message: 'imap connection not ready', status: 503}
+            throw new Error('imap connection not ready')
         }
 
         debug(`fetching full message ${uid}`)

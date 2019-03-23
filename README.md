@@ -42,7 +42,6 @@ TODO
 
 
 ## TODO
--   make notifications better, delay, collect, fix url
 
 Cleanup:
 -   error handling everywhere
