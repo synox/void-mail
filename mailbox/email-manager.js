@@ -1,17 +1,18 @@
 const _ = require('lodash')
 const mem = require('mem')
 const ImapFetcher = require('./imap-fetcher')
-const EmailStore = require('./email-store')
+const EmailSummaryStore = require('./email-summary-store')
 const debug = require('debug')('void-mail:imap-manager')
 
 /**
- * Fetches mails from imap, caches them and provides methods to access them.
+ * Fetches mails from imap, caches them and provides methods to access them. Also notifies the users via websockets about
+ * new messages.
  */
 class EmailManager {
     constructor(config, clientNotification) {
         this.config = config
         this.imapFetcher = new ImapFetcher(config)
-        this.store = new EmailStore()
+        this.summaryStore = new EmailSummaryStore()
         this.clientNotification = clientNotification
 
         // Cached methods:
@@ -20,12 +21,14 @@ class EmailManager {
 
 
     async connectImapAndAutorefresh() {
+        // first add the listener, so we don't miss any messages:
         this.imapFetcher.addNewMailListener(mail => this._onNewMail(mail))
+
         await this.imapFetcher.connectAndLoad()
     }
 
     getMailSummaries(address) {
-        return this.store.getMailSummariesFor(address)
+        return this.summaryStore.getForRecipient(address)
     }
 
     getOneFullMail(address, uid) {
@@ -33,14 +36,14 @@ class EmailManager {
     }
 
     getAllMailSummaries() {
-        return this.store.getAllMailSummaries()
+        return this.summaryStore.getAll()
     }
 
 
     _onNewMail(mail) {
         debug('new mail for', mail.to[0])
         mail.to.forEach(to => {
-            this.store.add(to, mail)
+            this.summaryStore.add(to, mail)
             return this.clientNotification.emit(to);
         })
 

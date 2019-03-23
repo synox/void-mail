@@ -44,8 +44,7 @@ TODO
 ## TODO
 
 Cleanup:
--   error handling everywhere
--   compare with https://github.com/o4oren/Ad-Hoc-Email-Server
+-   error handling everywhere (how to verify that all promises are catched, and eventEmitter have on-error?)
 -   reduce code base, if possible
 
 

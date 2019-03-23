@@ -9,16 +9,21 @@ const debug = require('debug')('void-mail:imap')
 const _ = require('lodash')
 
 /**
- * Fetches emails from the imap server. It is a facade against the more complicated imap api. It keeps the connection
+ * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
  * as a member field.
- *
- * TODO: handle connection problems,  connection losses and reconnection
  */
 class ImapFetcher extends EventEmitter {
     constructor(config) {
         super()
         this.config = config
+
+        /**
+         * Set of emitted UIDs. Listeners should get each email only once.
+         * @type {Set<any>}
+         */
         this.loadedUids = new Set()
+
+
         this.connection = null
         this.initialLoadDone = false
     }
@@ -30,15 +35,14 @@ class ImapFetcher extends EventEmitter {
             onmail: () => {
                 // only react to new mails after the initial load, otherwise it might load the same mails twice.
                 if (this.initialLoadDone) {
-
                     return this._loadMailSummariesAndPublish();
                 }
             }
         }
 
         this.once('all mails loaded', () => {
-            // during initial load we ignored new incoming emails. To catch up with those, we have to refresh
-            // the mails once after the initial load.
+            // during initial load we ignored new incoming emails. In order to catch up with those, we have to refresh
+            // the mails once after the initial load. (async)
             this._loadMailSummariesAndPublish()
         })
 
@@ -46,8 +50,7 @@ class ImapFetcher extends EventEmitter {
         try {
             await retry(async bail => {
                 // if anything throws, we retry
-                this.connectionPromise = imaps.connect(configWithListener);
-                this.connection = await this.connectionPromise;
+                this.connection = await imaps.connect(configWithListener);
                 await this.connection.openBox('INBOX')
             }, {
                 retries: 5
@@ -57,6 +60,7 @@ class ImapFetcher extends EventEmitter {
             process.exit(1)
         }
         this.connection.on('error', err => {
+                // We assume that the app will be restarted after a crash.
                 console.error('got fatal error during imap operation, stop app.', err)
                 process.exit(2)
             }
@@ -73,8 +77,7 @@ class ImapFetcher extends EventEmitter {
         }
 
 
-
-        // ASYNC, return call after connect
+        // Load all messages. ASYNC, return control flow after connecting.
         this._loadMailSummariesAndPublish();
 
         return this.connection
@@ -85,9 +88,13 @@ class ImapFetcher extends EventEmitter {
         const newUids = uids.filter(uid => !this.loadedUids.has(uid))
 
         // optimize by fetching several messages (but not all) with one 'search' call.
-        const uidChunks = _.chunk(newUids, 10)
+        // fetching all at once might be more efficient, but then it takes long until we see any messages
+        // in the frontend. With a small chunk size we ensure that we see the newest emails after a few seconds after
+        // restart.
+        const uidChunks = _.chunk(newUids, 20)
+
+        // returning a function. We do not start the search now, we just create the function.
         const fetchFunctions = uidChunks.map(uidChunk =>
-            // do not start the search now, just create the function.
             () => this._getMailHeadersAndPublish(uidChunk)
         )
 
@@ -102,9 +109,14 @@ class ImapFetcher extends EventEmitter {
 
     _createMailSummary(message) {
         const headerPart = message.parts[0].body
-        const to = headerPart.to.flatMap(to => addressparser(to))
-            .map(addressObj => addressObj.address) // The address also contains the name, just keep the email
-        const from = headerPart.from.flatMap(from => addressparser(from))
+        const to = headerPart.to
+            .flatMap(to => addressparser(to))
+            // The address also contains the name, just keep the email
+            .map(addressObj => addressObj.address)
+
+        const from = headerPart.from
+            .flatMap(from => addressparser(from))
+
         const subject = headerPart.subject[0]
         const date = headerPart.date[0]
         const uid = message.attributes.uid
@@ -120,19 +132,20 @@ class ImapFetcher extends EventEmitter {
     }
 
     async fetchOneFullMail(to, uid) {
-        // wait until the connection is established
         if (!this.connection) {
+            // here we 'fail fast' instead of waiting for the connection.
             throw new Error('imap connection not ready')
         }
 
         debug(`fetching full message ${uid}`)
+
+        // for security we also filter TO, so it is harder to just enumerate all messages.
         const searchCriteria = [
             ['UID', uid],
             ['TO', to]
         ]
         const fetchOptions = {
-            bodies: ['HEADER',
-                ''], // '' means full body
+            bodies: ['HEADER', ''], // empty string means full body
             markSeen: false
         }
 
@@ -141,14 +154,12 @@ class ImapFetcher extends EventEmitter {
             throw new Error('email not found')
         }
 
-        const all = _.find(messages[0].parts, {which: ''})
-
-        const mail = await simpleParser(all.body)
-        mail.uid = uid
-        return mail
+        const fullBody = _.find(messages[0].parts, {which: ''})
+        return await simpleParser(fullBody.body)
     }
 
     async _getAllUids() {
+        // imap-simple does not expose the underlying connection yet.
         const imapUnderlying = this.connection.imap;
         return await new Promise(function (resolve, reject) {
             imapUnderlying.search(['ALL'], function (err, uids) {
@@ -165,9 +176,9 @@ class ImapFetcher extends EventEmitter {
 
     async _getMailHeadersAndPublish(uids) {
         try {
-            const messages = await this._getMailHeaders(uids);
+            const mails = await this._getMailHeaders(uids);
             debug('fetched uids: ', uids)
-            messages.forEach(mail => {
+            mails.forEach(mail => {
                 this.loadedUids.add(mail.attributes.uid)
                 return this.emit('mail', this._createMailSummary(mail));
             })
