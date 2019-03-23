@@ -38,7 +38,6 @@ app.set('twig options', {
 
 // Application code:
 app.use(express.static(path.join(__dirname, 'public')))
-
 Twig.extendFilter('sanitizeHtml', sanitizeHtmlTwigFilter)
 
 const clientNotification = new ClientNotification()
@@ -53,7 +52,6 @@ app.get('/', (req, res, next) => {
 
 app.use('/login', loginRouter)
 app.use('/', inboxRouter)
-
 
 
 // catch 404 and forward to error handler
