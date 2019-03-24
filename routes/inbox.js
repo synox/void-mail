@@ -29,11 +29,16 @@ router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, _next) => {
 	})
 })
 
-router.get('^/:address/:uid([0-9]+$)', sanitizeAddress, (req, res, next) => {
-	req.app
-		.get('emailManager')
-		.getOneFullMail(req.params.address, req.params.uid)
-		.then(mail => {
+router.get(
+	'^/:address/:uid([0-9]+$)',
+	sanitizeAddress,
+	async (req, res, next) => {
+		try {
+			const emailManager = req.app.get('emailManager')
+			const mail = await emailManager.getOneFullMail(
+				req.params.address,
+				req.params.uid
+			)
 			if (mail) {
 				res.render('mail', {
 					title: req.params.address,
@@ -43,11 +48,11 @@ router.get('^/:address/:uid([0-9]+$)', sanitizeAddress, (req, res, next) => {
 			} else {
 				next({message: 'email not found', status: 404})
 			}
-		})
-		.catch(error => {
+		} catch (error) {
 			console.error('error while fetching one email', error)
-			next({message: error.message, status: error.status})
-		})
-})
+			next(error)
+		}
+	}
+)
 
 module.exports = router
