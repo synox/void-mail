@@ -18,9 +18,9 @@ class ImapFetcher extends EventEmitter {
 		this.config = config
 
 		/**
-         * Set of emitted UIDs. Listeners should get each email only once.
-         * @type {Set<any>}
-         */
+		 * Set of emitted UIDs. Listeners should get each email only once.
+		 * @type {Set<any>}
+		 */
 		this.loadedUids = new Set()
 
 		this.connection = null
@@ -46,13 +46,16 @@ class ImapFetcher extends EventEmitter {
 		})
 
 		try {
-			await retry(async _bail => {
-				// If anything throws, we retry
-				this.connection = await imaps.connect(configWithListener)
-				await this.connection.openBox('INBOX')
-			}, {
-				retries: 5
-			})
+			await retry(
+				async _bail => {
+					// If anything throws, we retry
+					this.connection = await imaps.connect(configWithListener)
+					await this.connection.openBox('INBOX')
+				},
+				{
+					retries: 5
+				}
+			)
 		} catch (error) {
 			console.error('can not connect, even with retry, stop app', error)
 			throw error
@@ -62,8 +65,7 @@ class ImapFetcher extends EventEmitter {
 			// We assume that the app will be restarted after a crash.
 			console.error('got fatal error during imap operation, stop app.', err)
 			process.exit(2)
-		}
-		)
+		})
 		debug('connected to imap')
 
 		// If the above trigger on new mails does not work reliable, we have to regularly check
@@ -71,7 +73,10 @@ class ImapFetcher extends EventEmitter {
 		// first time. (Note: set the refresh higher than the time it takes to download the mails).
 		if (this.config.imap.refreshIntervalSeconds) {
 			this.once('all mails loaded', () => {
-				setInterval(() => this._loadMailSummariesAndPublish(), this.config.imap.refreshIntervalSeconds * 1000)
+				setInterval(
+					() => this._loadMailSummariesAndPublish(),
+					this.config.imap.refreshIntervalSeconds * 1000
+				)
 			})
 		}
 
@@ -92,8 +97,8 @@ class ImapFetcher extends EventEmitter {
 		const uidChunks = _.chunk(newUids, 20)
 
 		// Returning a function. We do not start the search now, we just create the function.
-		const fetchFunctions = uidChunks.map(uidChunk =>
-			() => this._getMailHeadersAndPublish(uidChunk)
+		const fetchFunctions = uidChunks.map(uidChunk => () =>
+			this._getMailHeadersAndPublish(uidChunk)
 		)
 
 		await pSeries(fetchFunctions)
@@ -109,11 +114,10 @@ class ImapFetcher extends EventEmitter {
 		const headerPart = message.parts[0].body
 		const to = headerPart.to
 			.flatMap(to => addressparser(to))
-		// The address also contains the name, just keep the email
+			// The address also contains the name, just keep the email
 			.map(addressObj => addressObj.address)
 
-		const from = headerPart.from
-			.flatMap(from => addressparser(from))
+		const from = headerPart.from.flatMap(from => addressparser(from))
 
 		const subject = headerPart.subject[0]
 		const date = headerPart.date[0]
@@ -138,10 +142,7 @@ class ImapFetcher extends EventEmitter {
 		debug(`fetching full message ${uid}`)
 
 		// For security we also filter TO, so it is harder to just enumerate all messages.
-		const searchCriteria = [
-			['UID', uid],
-			['TO', to]
-		]
+		const searchCriteria = [['UID', uid], ['TO', to]]
 		const fetchOptions = {
 			bodies: ['HEADER', ''], // Empty string means full body
 			markSeen: false
@@ -159,7 +160,7 @@ class ImapFetcher extends EventEmitter {
 	async _getAllUids() {
 		// Imap-simple does not expose the underlying connection yet.
 		const imapUnderlying = this.connection.imap
-		return new Promise(((resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			imapUnderlying.search(['ALL'], (err, uids) => {
 				if (err) {
 					reject(err)
@@ -169,7 +170,7 @@ class ImapFetcher extends EventEmitter {
 				// Get newest messages first, order DESC
 				resolve(uids.sort().reverse())
 			})
-		}))
+		})
 	}
 
 	async _getMailHeadersAndPublish(uids) {
@@ -188,7 +189,10 @@ class ImapFetcher extends EventEmitter {
 
 	async _getMailHeaders(uids) {
 		debug('fetching uid', uids)
-		const fetchOptions = {bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'], struct: false}
+		const fetchOptions = {
+			bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
+			struct: false
+		}
 		const searchCriteria = [['UID', ...uids]]
 		return this.connection.search(searchCriteria, fetchOptions)
 	}

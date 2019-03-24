@@ -1,13 +1,11 @@
-
 function showNewMailsNotification(address, reloadPage) {
 	// We want the page to be reloaded. But then when clicking the notification, it can not find the tab and will open a new one.
 
-	const notification = new Notification(
-		address, {
-			body: 'You have new messages',
-			icon: '/images/logo.gif',
-			tag: 'voidmail-replace-notification'
-		})
+	const notification = new Notification(address, {
+		body: 'You have new messages',
+		icon: '/images/logo.gif',
+		tag: 'voidmail-replace-notification'
+	})
 	notification.addEventListener('click', event => {
 		// TODO: does not work after reloading the page
 		event.preventDefault()

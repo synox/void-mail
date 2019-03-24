@@ -16,14 +16,12 @@ class EmailSummaryStore {
 
 	getForRecipient(address) {
 		const mails = this.mailSummaries.get(address) || []
-		return _.orderBy(mails,
-			mail => Date.parse(mail.date), ['desc'])
+		return _.orderBy(mails, mail => Date.parse(mail.date), ['desc'])
 	}
 
 	getAll() {
 		const mails = [...this.mailSummaries.values()]
-		return _.orderBy(mails,
-			mail => Date.parse(mail.date), ['desc'])
+		return _.orderBy(mails, mail => Date.parse(mail.date), ['desc'])
 	}
 
 	add(to, mailSummary) {

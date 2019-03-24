@@ -5,7 +5,7 @@ const sanitizeHtml = require('sanitize-html')
  * @param {Object} value  the dom before transformation
  * @returns  {*} dom after transformation
  */
-exports.sanitizeHtmlTwigFilter = function (value) {
+exports.sanitizeHtmlTwigFilter = function(value) {
 	return sanitizeHtml(value, {
 		allowedAttributes: {
 			a: ['href', 'target', 'rel']
@@ -23,6 +23,5 @@ exports.sanitizeHtmlTwigFilter = function (value) {
 				}
 			}
 		}
-	}
-	)
+	})
 }

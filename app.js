@@ -69,11 +69,9 @@ app.use((err, req, res, _next) => {
 	res.render('error')
 })
 
-emailManager.connectImapAndAutorefresh()
-	.catch(error => {
-		console.error('fatal error from email manager', error)
-		return process.exit(1)
-	}
-	)
+emailManager.connectImapAndAutorefresh().catch(error => {
+	console.error('fatal error from email manager', error)
+	return process.exit(1)
+})
 
 module.exports = {app, server}

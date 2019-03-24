@@ -33,6 +33,7 @@
   },
   "xo": {
     "semicolon": false,
+    "prettier": true,
     "rules": {
       "no-unused-vars": [
         "error",

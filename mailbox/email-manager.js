@@ -15,7 +15,10 @@ class EmailManager {
 		this.clientNotification = clientNotification
 
 		// Cached methods:
-		this.cachedFetchFullMail = mem(this.imapFetcher.fetchOneFullMail.bind(this.imapFetcher), {maxAge: 10 * 60 * 1000})
+		this.cachedFetchFullMail = mem(
+			this.imapFetcher.fetchOneFullMail.bind(this.imapFetcher),
+			{maxAge: 10 * 60 * 1000}
+		)
 	}
 
 	async connectImapAndAutorefresh() {

@@ -3,11 +3,13 @@ const express = require('express')
 const router = new express.Router()
 const {sanitizeParam} = require('express-validator/filter')
 
-const sanitizeAddress = sanitizeParam('address').customSanitizer((value, {req}) => {
-	return req.params.address
-		.replace(/[^A-Za-z0-9_.+@-]/g, '') // Remove special characters
-		.toLowerCase()
-})
+const sanitizeAddress = sanitizeParam('address').customSanitizer(
+	(value, {req}) => {
+		return req.params.address
+			.replace(/[^A-Za-z0-9_.+@-]/g, '') // Remove special characters
+			.toLowerCase()
+	}
+)
 
 router.get('/all', (req, res, _next) => {
 	const emailManager = req.app.get('emailManager')
@@ -28,11 +30,16 @@ router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, _next) => {
 })
 
 router.get('^/:address/:uid([0-9]+$)', sanitizeAddress, (req, res, next) => {
-	req.app.get('emailManager')
+	req.app
+		.get('emailManager')
 		.getOneFullMail(req.params.address, req.params.uid)
 		.then(mail => {
 			if (mail) {
-				res.render('mail', {title: req.params.address, address: req.params.address, mail})
+				res.render('mail', {
+					title: req.params.address,
+					address: req.params.address,
+					mail
+				})
 			} else {
 				next({message: 'email not found', status: 404})
 			}
