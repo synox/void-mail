@@ -17,30 +17,20 @@
 One click installation: 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+See [Installation](docs/installation.md)
 
-Or manually: 
-- Install [Heroku CLI](https://devcenter.heroku.com/articles/getting-started-with-nodejs?singlepage=true#set-up)
+## Configuration Parameters
 
-```
-git clone https://github.com/synox/void-mail.git && cd void-mail
-npm install
-heroku login
-heroku create
-git push heroku master
-heroku config:set DOMAIN=example.com
-heroku config:set IMAP_SERVER=imap.example.com IMAP_USER=james IMAP_PASSWORD=Mypassword
-heroku config:set IMAP_REFRESH_INTERVAL_SECONDS=null
-heroku open
-```
+These are all set as environment variables. They are loaded in [config.js](helper/config.js) 
 
-*Requires [Node.js 10](https://nodejs.org).*
-
-
-## Usage
-
-TODO
-
-
+Parameter | Type | Description
+----------|------|-------------
+DOMAIN | String | The domain part after the @, where your receive emails. (e.g. `example.com`)
+IMAP_SERVER | String | The imap server address. (e.g. `imap.example.com`)
+IMAP_USER | String | The username used to sign into the imap server. 
+IMAP_PASSWORD | String | The password used to sign into the imap server.
+IMAP_REFRESH_INTERVAL_SECONDS | Integer | How often to check for new messages on the imap server. (default: disabled) Usually the application reacts immediately to new arrived mail.
+PORT | Integer | On which port to run the http interface. (`default: 3000`)
 ## TODO
 
 Cleanup:
@@ -60,9 +50,10 @@ Testing:
 Maybe Later:
 - docker deployment
 - Reactive imap stream as lib
+- support multiple domains
 
 
-
+http://ignorethecode.net/blog/2010/02/02/removing-features/
 
 ## Team
 
