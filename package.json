@@ -38,7 +38,7 @@
         "files": "public/javascripts/*.js",
         "esnext": false,
         "env": ["browser"],
-        "globals": ["io"],
+        "globals": ["io"]
       }
     ]
   },

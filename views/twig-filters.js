@@ -6,23 +6,23 @@ const sanitizeHtml = require('sanitize-html')
  * @returns transformation filter
  */
 exports.sanitizeHtmlTwigFilter = function (value) {
-  return sanitizeHtml(value, {
-    allowedAttributes: {
-      a: ['href', 'target', 'rel']
-    },
+	return sanitizeHtml(value, {
+		allowedAttributes: {
+			a: ['href', 'target', 'rel']
+		},
 
-    transformTags: {
-      a(tagName, attribs) {
-        return {
-          tagName,
-          attribs: {
-            rel: 'noreferrer noopener',
-            href: attribs.href,
-            target: '_blank'
-          }
-        }
-      }
-    }
-  }
-  )
+		transformTags: {
+			a(tagName, attribs) {
+				return {
+					tagName,
+					attribs: {
+						rel: 'noreferrer noopener',
+						href: attribs.href,
+						target: '_blank'
+					}
+				}
+			}
+		}
+	}
+	)
 }
