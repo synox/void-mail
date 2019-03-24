@@ -5,11 +5,11 @@ const randomWord = require('random-word')
 const {check, validationResult} = require('express-validator/check')
 const config = require('../helper/config')
 
-router.get('/', (req, res, next) => {
+router.get('/', (req, res, _next) => {
   res.render('login', {title: 'Login', username: randomWord(), domain: config.email.domain})
 })
 
-router.get('/random', (req, res, next) => {
+router.get('/random', (req, res, _next) => {
   res.redirect(`/${randomWord()}@${config.email.domain}`)
 })
 

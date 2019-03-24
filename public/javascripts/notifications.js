@@ -1,4 +1,3 @@
-/* eslint-disable */
 
 function showNewMailsNotification(address, reloadPage) {
   // We want the page to be reloaded. But then when clicking the notification, it can not find the tab and will open a new one.

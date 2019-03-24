@@ -32,8 +32,15 @@
     "xo": "^0.24.0"
   },
   "xo": {
-    "space": true,
-    "semicolon": false
+    "semicolon": false,
+    "overrides": [
+      {
+        "files": "public/javascripts/*.js",
+        "esnext": false,
+        "env": ["browser"],
+        "globals": ["io"],
+      }
+    ]
   },
   "engines": {
     "node": "10.x"
