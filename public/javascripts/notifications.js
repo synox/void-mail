@@ -1,3 +1,5 @@
+/* eslint no-unused-vars: 0 */
+
 function showNewMailsNotification(address, reloadPage) {
 	// We want the page to be reloaded. But then when clicking the notification, it can not find the tab and will open a new one.
 
@@ -7,7 +9,7 @@ function showNewMailsNotification(address, reloadPage) {
 		tag: 'voidmail-replace-notification'
 	})
 	notification.addEventListener('click', event => {
-		// TODO: does not work after reloading the page
+		// TODO: does not work after reloading the page, see #1
 		event.preventDefault()
 	})
 

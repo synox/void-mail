@@ -1,3 +1,4 @@
+const EventEmitter = require('events')
 const debug = require('debug')('void-mail:imap-manager')
 const mem = require('mem')
 const ImapFetcher = require('./imap-fetcher')
@@ -7,8 +8,9 @@ const EmailSummaryStore = require('./email-summary-store')
  * Fetches mails from imap, caches them and provides methods to access them. Also notifies the users via websockets about
  * new messages.
  */
-class EmailManager {
+class EmailManager extends EventEmitter {
 	constructor(config, clientNotification) {
+		super()
 		this.config = config
 		this.imapFetcher = new ImapFetcher(config)
 		this.summaryStore = new EmailSummaryStore()
@@ -19,6 +21,8 @@ class EmailManager {
 			this.imapFetcher.fetchOneFullMail.bind(this.imapFetcher),
 			{maxAge: 10 * 60 * 1000}
 		)
+
+		this.imapFetcher.on('error', err => this.emit('error', err))
 	}
 
 	async connectImapAndAutorefresh() {

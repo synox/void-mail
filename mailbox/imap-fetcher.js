@@ -64,7 +64,7 @@ class ImapFetcher extends EventEmitter {
 		this.connection.on('error', err => {
 			// We assume that the app will be restarted after a crash.
 			console.error('got fatal error during imap operation, stop app.', err)
-			process.exit(2)
+			this.emit('error', err)
 		})
 		debug('connected to imap')
 

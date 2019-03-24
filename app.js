@@ -1,3 +1,5 @@
+/* eslint unicorn/no-process-exit: 0 */
+
 const path = require('path')
 const http = require('http')
 const express = require('express')
@@ -72,6 +74,11 @@ app.use((err, req, res, _next) => {
 emailManager.connectImapAndAutorefresh().catch(error => {
 	console.error('fatal error from email manager', error)
 	return process.exit(1)
+})
+
+emailManager.on('error', err => {
+	console.error('error from emailManager, stopping.', err)
+	process.exit(1)
 })
 
 module.exports = {app, server}
