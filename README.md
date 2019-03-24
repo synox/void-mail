@@ -13,6 +13,13 @@
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
 
 
+# How it works
+You need a domain with [catch-all-mailbox](https://www.google.ch/search?q=how+to+setup+catch-all+imap+mailbox) and an imap account. 
+
+Then void-mail will automatically load all mails from the imap server. 
+
+When the user opens the void-mail web application, he/she can read the mails corresponding to a specific address.  
+
 ## Install
 One click installation: 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/synox/void-mail)
