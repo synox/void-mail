@@ -29,7 +29,7 @@ DOMAIN | String | The domain part after the @, where your receive emails. (e.g. 
 IMAP_SERVER | String | The imap server address. (e.g. `imap.example.com`)
 IMAP_USER | String | The username used to sign into the imap server. 
 IMAP_PASSWORD | String | The password used to sign into the imap server.
-IMAP_REFRESH_INTERVAL_SECONDS | Integer | How often to check for new messages on the imap server. (default: disabled) Usually the application reacts immediately to new arrived mail.
+IMAP_REFRESH_INTERVAL_SECONDS | Integer | How often to check for new messages on the imap server. (default: `undefined`) Usually the application reacts immediately to new arrived mail.
 PORT | Integer | On which port to run the http interface. (`default: 3000`)
 ## TODO
 
