@@ -1,7 +1,7 @@
 # Heroku
 
 ## 1-click install
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/synox/void-mail)
 
 ## Manual installation
 
