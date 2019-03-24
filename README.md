@@ -20,6 +20,13 @@ Then void-mail will automatically load all mails from the imap server.
 
 When the user opens the void-mail web application, he/she can read the mails corresponding to a specific address.  
 
+# Features
+
+* Push-Notification on new emails.
+* Mail presentation are sanitized to avoid tracking. 
+* In-Memory cache for very fast mail access. 
+* No database required! You just need a [catch-all-mailbox](https://www.google.ch/search?q=how+to+setup+catch-all+imap+mailbox) imap server.  
+
 ## Install
 One click installation: 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/synox/void-mail)
