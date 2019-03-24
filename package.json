@@ -33,6 +33,14 @@
   },
   "xo": {
     "semicolon": false,
+    "rules": {
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_"
+        }
+      ]
+    },
     "overrides": [
       {
         "files": "public/javascripts/*.js",

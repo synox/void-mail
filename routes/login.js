@@ -1,6 +1,6 @@
 const express = require('express')
 
-const router = express.Router()
+const router = new express.Router()
 const randomWord = require('random-word')
 const {check, validationResult} = require('express-validator/check')
 const config = require('../helper/config')

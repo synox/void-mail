@@ -1,6 +1,6 @@
 const express = require('express')
 
-const router = express.Router()
+const router = new express.Router()
 const {sanitizeParam} = require('express-validator/filter')
 
 const sanitizeAddress = sanitizeParam('address').customSanitizer((value, {req}) => {
@@ -9,7 +9,7 @@ const sanitizeAddress = sanitizeParam('address').customSanitizer((value, {req}) 
 		.toLowerCase()
 })
 
-router.get('/all', (req, res, next) => {
+router.get('/all', (req, res, _next) => {
 	const emailManager = req.app.get('emailManager')
 	res.render('inbox', {
 		title: 'All Mailboxes',
@@ -18,7 +18,7 @@ router.get('/all', (req, res, next) => {
 	})
 })
 
-router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, next) => {
+router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, _next) => {
 	const emailManager = req.app.get('emailManager')
 	res.render('inbox', {
 		title: req.params.address,

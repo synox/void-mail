@@ -2,8 +2,8 @@ const sanitizeHtml = require('sanitize-html')
 
 /**
  * Transformes <a> tags to always use "noreferrer noopener" and open in a new window.
- *
- * @returns transformation filter
+ * @param {Object} value  the dom before transformation
+ * @returns  {*} dom after transformation
  */
 exports.sanitizeHtmlTwigFilter = function (value) {
 	return sanitizeHtml(value, {

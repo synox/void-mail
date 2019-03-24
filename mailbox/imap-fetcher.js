@@ -1,7 +1,7 @@
+const EventEmitter = require('events')
 const imaps = require('imap-simple')
 const {simpleParser} = require('mailparser')
 const addressparser = require('nodemailer/lib/addressparser')
-const EventEmitter = require('events')
 const pSeries = require('p-series')
 const retry = require('async-retry')
 const debug = require('debug')('void-mail:imap')
@@ -46,7 +46,7 @@ class ImapFetcher extends EventEmitter {
 		})
 
 		try {
-			await retry(async bail => {
+			await retry(async _bail => {
 				// If anything throws, we retry
 				this.connection = await imaps.connect(configWithListener)
 				await this.connection.openBox('INBOX')
@@ -148,7 +148,7 @@ class ImapFetcher extends EventEmitter {
 		}
 
 		const messages = await this.connection.search(searchCriteria, fetchOptions)
-		if (messages.length == 0) {
+		if (messages.length === 0) {
 			throw new Error('email not found')
 		}
 
