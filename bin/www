@@ -35,9 +35,9 @@ function onError(error) {
         throw error;
     }
 
-    const bind = typeof port === 'string'
-        ? 'Pipe ' + port
-        : 'Port ' + port;
+    const bind = typeof config.http.port === 'string'
+        ? 'Pipe ' + config.http.port
+        : 'Port ' + config.http.port;
 
     // handle specific listen errors with friendly messages
     switch (error.code) {
