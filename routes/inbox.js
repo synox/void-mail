@@ -16,7 +16,7 @@ router.get('/all', (req, res, _next) => {
 	res.render('inbox', {
 		title: 'All Mailboxes',
 		address: 'all mails',
-		mailSummaries: emailManager.getAllMailSummaries()
+		mailSummaries: emailManager.getAllMailSummaries(),
 	})
 })
 
@@ -25,7 +25,7 @@ router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, _next) => {
 	res.render('inbox', {
 		title: req.params.address,
 		address: req.params.address,
-		mailSummaries: emailManager.getMailSummaries(req.params.address)
+		mailSummaries: emailManager.getMailSummaries(req.params.address),
 	})
 })
 
@@ -43,7 +43,7 @@ router.get(
 				res.render('mail', {
 					title: req.params.address,
 					address: req.params.address,
-					mail
+					mail,
 				})
 			} else {
 				next({message: 'email not found', status: 404})

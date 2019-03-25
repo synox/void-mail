@@ -1,7 +1,7 @@
 {% extends 'layout.twig' %}
 
 {% block body %}
-  <div style="float: right"><a href="/login"> logout</a></div>
+  <div style="float: right"><a href="{{ baseUrl }}/login"> logout</a></div>
 
   <h1>{{message}}</h1>
   <h2>{{error.status}}</h2>

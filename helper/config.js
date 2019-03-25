@@ -11,7 +11,10 @@ const config = {
 		authTimeout: 3000,
 		refreshIntervalSeconds: process.env.IMAP_REFRESH_INTERVAL_SECONDS
 	},
-	http: {port: normalizePort(process.env.PORT || '3000')}
+	http: {
+		port: normalizePort(process.env.PORT || '3000'),
+		baseUrl: process.env.BASE_URL || '' // mountpoint starting with slash, without trailing slash. Or empty string.
+	}
 }
 
 if (!config.imap.user || !config.imap.password || !config.imap.host) {

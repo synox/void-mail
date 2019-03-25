@@ -3,14 +3,14 @@
 {% block body %}
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            enableNewMessageNotifications('{{ address }}', true)
+            enableNewMessageNotifications('{{ address }}', true, '{{ baseUrl }}')
         });
     </script>
 
-    <div style="float: right"><a href="/login"> logout</a></div>
+    <div style="float: right"><a href="{{ baseUrl }}/login"> logout</a></div>
     <h1>{{ address }}</h1>
     {% for mail in mailSummaries %}
-        <a href="{{ mail.to[0] }}/{{ mail.uid }}" class="no-link-color">
+        <a href="{{ baseUrl }}/{{ mail.to[0] }}/{{ mail.uid }}" class="no-link-color">
             <blockquote class="email">
                 <h6 class="list-group-item-heading">
                     {{ mail.from[0].name }}
