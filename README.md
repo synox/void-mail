@@ -47,7 +47,6 @@ IMAP_USER | String | The username used to sign into the imap server.
 IMAP_PASSWORD | String | The password used to sign into the imap server.
 IMAP_REFRESH_INTERVAL_SECONDS | Integer | How often to check for new messages on the imap server. (default: `undefined`) Usually the application reacts immediately to new arrived mail.
 PORT | Integer | On which port to run the http interface. (`default: 3000`)
-BASE_URL | String | Sub-path where to mount the app. Usually empty. (e.g. `/trash`)
 ## TODO
 
 Cleanup:
