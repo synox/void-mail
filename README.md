@@ -34,7 +34,6 @@ One click installation:
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/synox/void-mail)
 
 
-
 See [Installation](docs/installation.md)
 
 ## Configuration Parameters
@@ -49,12 +48,15 @@ IMAP_USER | String | The username used to sign into the imap server.
 IMAP_PASSWORD | String | The password used to sign into the imap server.
 IMAP_REFRESH_INTERVAL_SECONDS | Integer | How often to check for new messages on the imap server. (default: `undefined`) Usually the application reacts immediately to new arrived mail.
 PORT | Integer | On which port to run the http interface. (`default: 3000`)
+
+
 ## TODO
+
+This mostly works, but some things need to be done:
 
 Cleanup:
 -   error handling everywhere (how to verify that all promises are catched, and eventEmitter have on-error?)
 -   reduce code base, if possible
-
 
 Features:
 - better random names
@@ -67,8 +69,29 @@ Testing:
 
 Maybe Later:
 - docker deployment
-- Reactive imap stream as lib
 - support multiple domains
+- Reactive imap stream as lib
+    
+    imap stream module
+    - fetches uids
+    - fetches each message headers
+    	- emits a new mail for each message
+    - keeps a list of all emited uid, not to send those again
+    - fetch uids again by timer and server trigger, fetch new messages
+    
+    
+    mail manager / frontend store/cache
+    - read mail stream
+    - notify users about new messages
+    - store a copy of the headers to serve the frontend
+    	- use email-store
+    - fetch and cache full mails on request
+    
+    
+    compare
+    https://www.npmjs.com/package/imap-stream
+    
+    https://www.npmjs.com/search?q=imap%20stream
 
 
 http://ignorethecode.net/blog/2010/02/02/removing-features/
