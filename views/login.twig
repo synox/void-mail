@@ -2,7 +2,7 @@
 
 {% block body %}
 
-    <a class="button" href="{{ baseUrl }}/login/random">Login to random mailbox</a>
+    <a class="button" href="/login/random">Login to random mailbox</a>
 
     <h1>Sign in</h1>
 
@@ -11,7 +11,7 @@
             Your input was invalid. Please try other values.
         </blockquote>
     {% endif %}
-    <form method="POST" action="{{ baseUrl }}/login">
+    <form method="POST" action="/login">
         <fieldset>
             <label for="nameField">Name</label>
             <input type="text" id="nameField" name="username" value="{{ username }}">

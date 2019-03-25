@@ -9,12 +9,12 @@ router.get('/', (req, res, _next) => {
 	res.render('login', {
 		title: 'Login',
 		username: randomWord(),
-		domain: config.email.domain,
+		domain: config.email.domain
 	})
 })
 
 router.get('/random', (req, res, _next) => {
-	res.redirect(`${config.http.baseUrl}/${randomWord()}@${config.email.domain}`)
+	res.redirect(`/${randomWord()}@${config.email.domain}`)
 })
 
 router.post(
@@ -30,11 +30,11 @@ router.post(
 				title: 'Login',
 				username: req.body.username,
 				domain: config.email.domain,
-				userInputError: true,
+				userInputError: true
 			})
 		}
 
-		res.redirect(`${config.http.baseUrl}/${req.body.username}@${req.body.domain}`)
+		res.redirect(`/${req.body.username}@${req.body.domain}`)
 	}
 )
 

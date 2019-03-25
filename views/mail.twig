@@ -1,13 +1,14 @@
 {% extends 'layout.twig' %}
 
 {% block body %}
-    <script src="{{ baseUrl }}/javascripts/notifications.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script src="/javascripts/notifications.js"></script>
     <script>
-        enableNewMessageNotifications('{{ address }}',false, '{{ baseUrl }}')
+        enableNewMessageNotifications('{{ address }}',false)
     </script>
 
-    <a href="{{ baseUrl }}/{{ address }}"> ← Return to inbox</a>
-    <div style="float: right"><a href="{{ baseUrl }}/login"> logout</a></div>
+    <a href="/{{ address }}"> ← Return to inbox</a>
+    <div style="float: right"><a href="/login"> logout</a></div>
     <h1>{{ mail.subject }}</h1>
     <h2>{{ mail.from.text }}</h2>
     <h3>{{ mail.date| date }}</h3>

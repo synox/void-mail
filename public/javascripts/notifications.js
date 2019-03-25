@@ -5,7 +5,7 @@ function showNewMailsNotification(address, reloadPage) {
 
 	const notification = new Notification(address, {
 		body: 'You have new messages',
-		icon: baseUrl +'/images/logo.gif',
+		icon: '/images/logo.gif',
 		tag: 'voidmail-replace-notification'
 	})
 	notification.addEventListener('click', event => {
@@ -18,7 +18,7 @@ function showNewMailsNotification(address, reloadPage) {
 	}
 }
 
-function enableNewMessageNotifications(address, reloadPage, baseUrl) {
+function enableNewMessageNotifications(address, reloadPage) {
 	enableNotifications()
 	const socket = io()
 	socket.emit('sign in', address)
@@ -27,7 +27,7 @@ function enableNewMessageNotifications(address, reloadPage, baseUrl) {
 		socket.emit('sign in', address)
 	})
 	socket.on('new emails', () => {
-		showNewMailsNotification(address, reloadPage, baseUrl)
+		showNewMailsNotification(address, reloadPage)
 	})
 }
 

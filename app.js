@@ -38,11 +38,8 @@ app.set('twig options', {
 	autoescape: true
 })
 
-// allows to mount the application under a different path than /
-app.locals.baseUrl = config.http.baseUrl
-
 // Application code:
-app.use(`${config.http.baseUrl}`, express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'public')))
 Twig.extendFilter('sanitizeHtml', sanitizeHtmlTwigFilter)
 
 const clientNotification = new ClientNotification()
@@ -51,12 +48,12 @@ clientNotification.use(io)
 const emailManager = new EmailManager(config, clientNotification)
 app.set('emailManager', emailManager)
 
-app.get(`${app.locals.baseUrl}/`, (req, res, _next) => {
-	res.redirect(`${app.locals.baseUrl}/login`)
+app.get('/', (req, res, _next) => {
+	res.redirect('/login')
 })
 
-app.use(`${app.locals.baseUrl}/login`, loginRouter)
-app.use(`${app.locals.baseUrl}/`, inboxRouter)
+app.use('/login', loginRouter)
+app.use('/', inboxRouter)
 
 // Catch 404 and forward to error handler
 app.use((req, res, next) => {
