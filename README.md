@@ -54,13 +54,14 @@ PORT | Integer | On which port to run the http interface. (`default: 3000`)
 
 This mostly works, but some things need to be done:
 
+- delete mails after X days. (with config)
+
 Cleanup:
 -   error handling everywhere (how to verify that all promises are catched, and eventEmitter have on-error?)
 -   reduce code base, if possible
 
 Features:
 - better random names
-- delete mails after X days.
 
 
 Testing:
