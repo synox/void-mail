@@ -20,6 +20,8 @@ Then void-mail will automatically load all mails from the imap server.
 
 When the user opens the void-mail web application, he/she can read the mails corresponding to a specific address.  
 
+See [FAQ](docs/faq.md)
+
 # Features
 
 * Push-Notification on new emails.
