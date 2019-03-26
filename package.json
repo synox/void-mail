@@ -20,6 +20,7 @@
     "mailparser": "^2.4.3",
     "mem": "^4.2.0",
     "mnemonist": "^0.27.2",
+    "moment": "^2.24.0",
     "morgan": "~1.9.0",
     "nodemailer": "^5.1.1",
     "p-series": "^2.0.0",
@@ -46,8 +47,12 @@
       {
         "files": "public/javascripts/*.js",
         "esnext": false,
-        "env": ["browser"],
-        "globals": ["io"]
+        "env": [
+          "browser"
+        ],
+        "globals": [
+          "io"
+        ]
       }
     ]
   },

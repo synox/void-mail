@@ -3,7 +3,7 @@ const debug = require('debug')('void-mail:imap-manager')
 const mem = require('mem')
 const ImapService = require('./imap-service')
 const EmailSummaryStore = require('./email-summary-store')
-const {daysAgo} = require('../helper/time')
+const moment = require('moment');
 
 /**
  * Fetches mails from imap, caches them and provides methods to access them. Also notifies the users via websockets about
@@ -78,7 +78,7 @@ class EmailManager extends EventEmitter {
 	async _deleteOldMails() {
 		try {
 			await this.imapService.deleteOldMails(
-				daysAgo(this.config.imap.deleteMailsOlderThanDays)
+				moment().subtract(this.config.imap.deleteMailsOlderThanDays, 'days').toDate()
 			)
 		} catch (error) {
 			console.log('can not delete old messages', error)
