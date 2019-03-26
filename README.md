@@ -97,7 +97,8 @@ Maybe Later:
 
 ## Team
 
-[![Aravindo Wingeier](https://github.com/synox.png?size=130)](https://github.com/synox) 
+[![Aravindo Wingeier](https://github.com/synox.png?size=130)](https://github.com/synox) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail?ref=badge_shield)
+
 ---
 [Aravindo Wingeier](https://github.com/synox) 
 
@@ -105,3 +106,6 @@ Maybe Later:
 ## License
 
 GPL © [Aravindo Wingeier](https://github.com/synox)
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail?ref=badge_large)
