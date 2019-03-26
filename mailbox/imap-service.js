@@ -130,13 +130,6 @@ class ImapService extends EventEmitter {
 		this.on('mailDeleted', cb)
 	}
 
-	async deleteMails(uids) {
-		if (!uids.length) {
-			return
-		}
-		debug(`deleting mails ${uids}`)
-		return this.connection.deleteMessage(uids)
-	}
 
 	/**
 	 *
@@ -149,8 +142,10 @@ class ImapService extends EventEmitter {
 			return
 		}
 
-		await this.deleteMails(uids)
+		debug(`deleting mails ${uids}`)
+		await this.connection.deleteMessage(uids)
 		console.log(`deleted ${uids.length} old messages.`)
+
 		uids.forEach(uid => this.emit('mailDeleted', uid))
 	}
 
@@ -222,19 +217,9 @@ class ImapService extends EventEmitter {
 	}
 
 	async _getAllUids() {
-		// Imap-simple does not expose the underlying connection yet.
-		const imapUnderlying = this.connection.imap
-		return new Promise((resolve, reject) => {
-			imapUnderlying.search(['!DELETED'], (err, uids) => {
-				if (err) {
-					reject(err)
-					return
-				}
-
-				// Get newest messages first, order DESC
-				resolve(uids.sort().reverse())
-			})
-		})
+		const uids = await this._searchWithoutFetch([['!DELETED']])
+		// create copy to not mutate the original array
+		return Array.from(uids).sort().reverse()
 	}
 
 	async _getMailHeadersAndPublish(uids) {
