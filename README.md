@@ -11,7 +11,7 @@
 
 [![Build Status](https://travis-ci.org/synox/void-mail.svg?branch=master)](https://travis-ci.org/synox/void-mail)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
-
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail?ref=badge_shield)
 
 # How it works
 You need a domain with [catch-all-mailbox](https://www.google.ch/search?q=how+to+setup+catch-all+imap+mailbox) and an imap account. 
@@ -105,3 +105,5 @@ Maybe Later:
 ## License
 
 GPL © [Aravindo Wingeier](https://github.com/synox)
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail?ref=badge_large)
