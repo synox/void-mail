@@ -7,7 +7,7 @@
 </div>
 
 
-> a simple and fast disposable mail service that works directly with your imap server. No database required. 
+> a self-hosted, simple and fast disposable mail service that works directly with your imap server. No database required. 
 
 [![Build Status](https://travis-ci.org/synox/void-mail.svg?branch=master)](https://travis-ci.org/synox/void-mail)
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
@@ -16,7 +16,7 @@
 # How it works
 You need a domain with [catch-all-mailbox](https://www.google.ch/search?q=how+to+setup+catch-all+imap+mailbox) and an imap account. 
 
-Then void-mail will automatically load all mails from the imap server. 
+Your run the void-mail nodejs application on your own server. It will automatically load all mails from the imap server. 
 
 When the user opens the void-mail web application, he/she can read the mails corresponding to a specific address.  
 
@@ -28,6 +28,7 @@ See [FAQ](docs/faq.md)
 * Mail presentation are sanitized to avoid tracking. 
 * In-Memory cache for very fast mail access. 
 * No database required! You just need a [catch-all-mailbox](https://www.google.ch/search?q=how+to+setup+catch-all+imap+mailbox) imap server.  
+* Deletes emails older than X days. 
 
 ## Install
 One click installation: 
