@@ -26,7 +26,7 @@ class EmailManager extends EventEmitter {
 		this.imapService.on('error', err => this.emit('error', err))
 
 		// delete old mails after all mails have been loaded
-		this.imapService.once('all mails loaded', ()=> this._deleteOldMails())
+		this.imapService.once('initial load done', ()=> this._deleteOldMails())
 
 
 		// delete old messages every few hours

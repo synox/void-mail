@@ -31,26 +31,34 @@ class ImapService extends EventEmitter {
 		const configWithListener = {
 			...this.config,
 			// 'onmail' adds a callback when new mails arrive. With this we can keep the imap refresh interval very low (or even disable it).
-			onmail: () => {
-				// Only react to new mails after the initial load, otherwise it might load the same mails twice.
-				if (this.initialLoadDone) {
-					return this._loadMailSummariesAndPublish()
-				}
-			}
+			onmail: () => this._doOnNewMail()
 		}
 
-		this.once('all mails loaded', () => {
-			// During initial load we ignored new incoming emails. In order to catch up with those, we have to refresh
-			// the mails once after the initial load. (async)
-			this._loadMailSummariesAndPublish()
-		})
+		this.once('initial load done', () => this._doAfterInitialLoad())
 
+		await this._connectWithRetry(configWithListener);
+
+		// Load all messages. ASYNC, return control flow after connecting.
+		this._loadMailSummariesAndPublish()
+
+		return this.connection
+	}
+
+	async _connectWithRetry(configWithListener) {
 		try {
 			await retry(
 				async _bail => {
 					// If anything throws, we retry
 					this.connection = await imaps.connect(configWithListener)
+
+					this.connection.on('error', err => {
+						// We assume that the app will be restarted after a crash.
+						console.error('got fatal error during imap operation, stop app.', err)
+						this.emit('error', err)
+					})
+
 					await this.connection.openBox('INBOX')
+					debug('connected to imap')
 				},
 				{
 					retries: 5
@@ -60,30 +68,29 @@ class ImapService extends EventEmitter {
 			console.error('can not connect, even with retry, stop app', error)
 			throw error
 		}
+	}
 
-		this.connection.on('error', err => {
-			// We assume that the app will be restarted after a crash.
-			console.error('got fatal error during imap operation, stop app.', err)
-			this.emit('error', err)
-		})
-		debug('connected to imap')
+	_doOnNewMail() {
+// Only react to new mails after the initial load, otherwise it might load the same mails twice.
+		if (this.initialLoadDone) {
+			this._loadMailSummariesAndPublish()
+		}
+	}
+
+	_doAfterInitialLoad() {
+		// During initial load we ignored new incoming emails. In order to catch up with those, we have to refresh
+		// the mails once after the initial load. (async)
+		this._loadMailSummariesAndPublish()
 
 		// If the above trigger on new mails does not work reliable, we have to regularly check
 		// for new mails on the server. This is done only after all the mails have been loaded for the
 		// first time. (Note: set the refresh higher than the time it takes to download the mails).
 		if (this.config.imap.refreshIntervalSeconds) {
-			this.once('all mails loaded', () => {
-				setInterval(
-					() => this._loadMailSummariesAndPublish(),
-					this.config.imap.refreshIntervalSeconds * 1000
-				)
-			})
+			setInterval(
+				() => this._loadMailSummariesAndPublish(),
+				this.config.imap.refreshIntervalSeconds * 1000
+			)
 		}
-
-		// Load all messages. ASYNC, return control flow after connecting.
-		this._loadMailSummariesAndPublish()
-
-		return this.connection
 	}
 
 	async _loadMailSummariesAndPublish() {
@@ -102,8 +109,11 @@ class ImapService extends EventEmitter {
 		)
 
 		await pSeries(fetchFunctions)
-		this.initialLoadDone = true
-		this.emit('all mails loaded')
+		if (!this.initialLoadDone) {
+			this.initialLoadDone = true
+			this.emit('initial load done')
+
+		}
 	}
 
 	addNewMailListener(cb) {
@@ -131,10 +141,10 @@ class ImapService extends EventEmitter {
 		const uids = await this._searchWithoutFetch([['BEFORE', deleteMailsBefore]])
 		return Promise.all(
 			uids.map(async uid => {
-				let mail = this._createMailSummary(await this.fetchOneFullMail('todo', uid))
+				let mail = await this.fetchOneFullMail('todo', uid)
 				console.error('would now delete ', uid, mail.subject, mail.date)
 				// return this.deleteMail(uid); // TODO: make hot
-				return new Promise()
+				return new Promise((resolve)=>resolve(null))
 			})
 		)
 	}
@@ -192,7 +202,7 @@ class ImapService extends EventEmitter {
 		debug(`fetching full message ${uid}`)
 
 		// For security we also filter TO, so it is harder to just enumerate all messages.
-		const searchCriteria = [['UID', uid],
+		const searchCriteria = [['UID', uid]
 			// ['TO', to]
 		]
 		const fetchOptions = {
