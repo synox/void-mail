@@ -55,44 +55,13 @@ DELETE_MAILS_OLDER_THAN_DAYS | Integer | How many days to to wait before deletin
 
 This mostly works, but some things need to be done:
 
-Cleanup:
--   error handling everywhere (how to verify that all promises are catched, and eventEmitter have on-error?)
-
-Features:
-- better random names
-
 Testing:
--   provide config for fixed data for offline testing
--   create tests
+-   create unit/integration tests
 
 Maybe Later:
-- docker deployment
 - support multiple domains
-- Reactive imap stream as lib
-    
-    imap stream module
-    - fetches uids
-    - fetches each message headers
-    	- emits a new mail for each message
-    - keeps a list of all emited uid, not to send those again
-    - fetch uids again by timer and server trigger, fetch new messages
-    
-    
-    mail manager / frontend store/cache
-    - read mail stream
-    - notify users about new messages
-    - store a copy of the headers to serve the frontend
-    	- use email-store
-    - fetch and cache full mails on request
-    
-    
-    compare
-    https://www.npmjs.com/package/imap-stream
-    
-    https://www.npmjs.com/search?q=imap%20stream
-
--   reduce code base, if possible
-    
+- docker deployment
+- reduce code base, if possible    
     http://ignorethecode.net/blog/2010/02/02/removing-features/
 
 ## Team
