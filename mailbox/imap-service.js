@@ -34,7 +34,9 @@ class ImapService extends EventEmitter {
 			onmail: () => this._doOnNewMail()
 		}
 
-		this.once(ImapService.EVENT_INITIAL_LOAD_DONE, () => this._doAfterInitialLoad())
+		this.once(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
+			this._doAfterInitialLoad()
+		)
 
 		await this._connectWithRetry(configWithListener)
 
@@ -123,7 +125,10 @@ class ImapService extends EventEmitter {
 	 */
 	async deleteOldMails(deleteMailsBefore) {
 		debug(`deleting mails before ${deleteMailsBefore}`)
-		const uids = await this._searchWithoutFetch([['!DELETED'], ['BEFORE', deleteMailsBefore]])
+		const uids = await this._searchWithoutFetch([
+			['!DELETED'],
+			['BEFORE', deleteMailsBefore]
+		])
 		if (!uids.length) {
 			return
 		}
@@ -204,8 +209,8 @@ class ImapService extends EventEmitter {
 
 	async _getAllUids() {
 		const uids = await this._searchWithoutFetch([['!DELETED']])
-		// create copy to not mutate the original array
-		return Array.from(uids).sort().reverse()
+		// Create copy to not mutate the original array
+		return [...uids].sort().reverse()
 	}
 
 	async _getMailHeadersAndPublish(uids) {
@@ -213,7 +218,10 @@ class ImapService extends EventEmitter {
 			const mails = await this._getMailHeaders(uids)
 			mails.forEach(mail => {
 				this.loadedUids.add(mail.attributes.uid)
-				return this.emit(ImapService.EVENT_NEW_MAIL, this._createMailSummary(mail))
+				return this.emit(
+					ImapService.EVENT_NEW_MAIL,
+					this._createMailSummary(mail)
+				)
 			})
 		} catch (error) {
 			debug('can not fetch', error)

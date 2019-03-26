@@ -35,10 +35,10 @@ class EmailSummaryStore {
 			mails
 				.filter(mail => mail.uid === uid)
 				.forEach(mail => {
-					this.mailSummaries.remove(to, mail);
-					debug('removed ', mail.date, to, mail.subject);
+					this.mailSummaries.remove(to, mail)
+					debug('removed ', mail.date, to, mail.subject)
 				})
-		});
+		})
 	}
 
 	mailCount() {

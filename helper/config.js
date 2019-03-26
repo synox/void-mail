@@ -2,7 +2,6 @@ const config = {
 	email: {
 		domain: process.env.DOMAIN,
 		deleteMailsOlderThanDays: process.env.DELETE_MAILS_OLDER_THAN_DAYS || 30
-
 	},
 	imap: {
 		user: process.env.IMAP_USER,
