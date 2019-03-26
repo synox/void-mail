@@ -9,7 +9,8 @@ const config = {
 		port: 993,
 		tls: true,
 		authTimeout: 3000,
-		refreshIntervalSeconds: process.env.IMAP_REFRESH_INTERVAL_SECONDS
+		refreshIntervalSeconds: process.env.IMAP_REFRESH_INTERVAL_SECONDS,
+		deleteMailsOlderThanDays: 30
 	},
 	http: {port: normalizePort(process.env.PORT || '3000')}
 }

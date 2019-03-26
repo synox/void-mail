@@ -1,8 +1,9 @@
 const EventEmitter = require('events')
 const debug = require('debug')('void-mail:imap-manager')
 const mem = require('mem')
-const ImapFetcher = require('./imap-fetcher')
+const ImapService = require('./imap-service')
 const EmailSummaryStore = require('./email-summary-store')
+const {daysAgo} = require('../helper/time')
 
 /**
  * Fetches mails from imap, caches them and provides methods to access them. Also notifies the users via websockets about
@@ -12,24 +13,26 @@ class EmailManager extends EventEmitter {
 	constructor(config, clientNotification) {
 		super()
 		this.config = config
-		this.imapFetcher = new ImapFetcher(config)
+		this.imapService = new ImapService(config)
 		this.summaryStore = new EmailSummaryStore()
 		this.clientNotification = clientNotification
 
 		// Cached methods:
 		this.cachedFetchFullMail = mem(
-			this.imapFetcher.fetchOneFullMail.bind(this.imapFetcher),
+			this.imapService.fetchOneFullMail.bind(this.imapService),
 			{maxAge: 10 * 60 * 1000}
 		)
 
-		this.imapFetcher.on('error', err => this.emit('error', err))
+		this.imapService.on('error', err => this.emit('error', err))
+
+		setInterval(() => this._deleteOldMails(), 3600)
 	}
 
 	async connectImapAndAutorefresh() {
 		// First add the listener, so we don't miss any messages:
-		this.imapFetcher.addNewMailListener(mail => this._onNewMail(mail))
+		this.imapService.addNewMailListener(mail => this._onNewMail(mail))
 
-		await this.imapFetcher.connectAndLoad()
+		await this.imapService.connectAndLoad()
 	}
 
 	getMailSummaries(address) {
@@ -50,6 +53,10 @@ class EmailManager extends EventEmitter {
 			this.summaryStore.add(to, mail)
 			return this.clientNotification.emit(to)
 		})
+	}
+
+	async _deleteOldMails() {
+		this.imapService.deleteOldMails(daysAgo(this.config.imap.deleteMailsOlderThanDays))
 	}
 
 	_saveToFile(mails, filename) {

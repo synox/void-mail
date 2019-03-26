@@ -12,7 +12,7 @@ const _ = require('lodash')
  * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
  * as a member field.
  */
-class ImapFetcher extends EventEmitter {
+class ImapService extends EventEmitter {
 	constructor(config) {
 		super()
 		this.config = config
@@ -110,6 +110,55 @@ class ImapFetcher extends EventEmitter {
 		this.on('mail', cb)
 	}
 
+	async deleteMail(uid) {
+		return this.connection.addFlags(uid, '\\Deleted')
+
+		// TODO: expunge() once in a while
+		/*
+		expunge([< MessageSource >uids, ]< function >callback) - (void) -
+		Permanently removes all messages flagged as Deleted in the currently open mailbox.
+		 If the server supports the 'UIDPLUS' capability, uids can be supplied to only remove messages
+		 that both have their uid in uids and have the \Deleted flag set. callback has 1 parameter: < Error >err.
+		 */
+	}
+
+	/**
+	 *
+	 * @param {Date} deleteMailsBefore delete mails before this date instance
+	 */
+	async deleteOldMails(deleteMailsBefore) {
+
+		const uids = await this._searchWithoutFetch([['BEFORE', deleteMailsBefore]])
+		return Promise.all(
+			uids.map(async uid => {
+				console.error('would now delete ', uid)
+				// return this.deleteMail(uid); // TODO: make hot
+				return new Promise()
+			})
+		)
+	}
+
+	/**
+	 *
+	 * @param searchCriteria (see ImapSimple#search)
+	 * @returns {Promise<Array<Int>>} Array of UIDs
+	 * @private
+	 */
+	async _searchWithoutFetch(searchCriteria) {
+		const imapUnderlying = this.connection.imap
+
+		return new Promise(function (resolve, reject) {
+			imapUnderlying.search(searchCriteria, function (err, uids) {
+				if (err) {
+					reject(err);
+					return;
+				}
+
+				resolve(uids || []);
+			})
+		})
+	}
+
 	_createMailSummary(message) {
 		const headerPart = message.parts[0].body
 		const to = headerPart.to
@@ -161,7 +210,7 @@ class ImapFetcher extends EventEmitter {
 		// Imap-simple does not expose the underlying connection yet.
 		const imapUnderlying = this.connection.imap
 		return new Promise((resolve, reject) => {
-			imapUnderlying.search(['ALL'], (err, uids) => {
+			imapUnderlying.search(['!DELETED'], (err, uids) => {
 				if (err) {
 					reject(err)
 					return
@@ -198,4 +247,4 @@ class ImapFetcher extends EventEmitter {
 	}
 }
 
-module.exports = ImapFetcher
+module.exports = ImapService
