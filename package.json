@@ -15,11 +15,12 @@
     "express-validator": "^5.3.1",
     "helmet": "^3.16.0",
     "http-errors": "~1.6.2",
-    "imap-simple": "^4.3.0",
+    "imap-simple": "synox/imap-simple#feature/delete",
     "lodash": "^4.17.11",
     "mailparser": "^2.4.3",
     "mem": "^4.2.0",
     "mnemonist": "^0.27.2",
+    "moment": "^2.24.0",
     "morgan": "~1.9.0",
     "nodemailer": "^5.1.1",
     "p-series": "^2.0.0",
@@ -46,8 +47,12 @@
       {
         "files": "public/javascripts/*.js",
         "esnext": false,
-        "env": ["browser"],
-        "globals": ["io"]
+        "env": [
+          "browser"
+        ],
+        "globals": [
+          "io"
+        ]
       }
     ]
   },

@@ -12,7 +12,7 @@ const _ = require('lodash')
  * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
  * as a member field.
  */
-class ImapFetcher extends EventEmitter {
+class ImapService extends EventEmitter {
 	constructor(config) {
 		super()
 		this.config = config
@@ -31,26 +31,37 @@ class ImapFetcher extends EventEmitter {
 		const configWithListener = {
 			...this.config,
 			// 'onmail' adds a callback when new mails arrive. With this we can keep the imap refresh interval very low (or even disable it).
-			onmail: () => {
-				// Only react to new mails after the initial load, otherwise it might load the same mails twice.
-				if (this.initialLoadDone) {
-					return this._loadMailSummariesAndPublish()
-				}
-			}
+			onmail: () => this._doOnNewMail()
 		}
 
-		this.once('all mails loaded', () => {
-			// During initial load we ignored new incoming emails. In order to catch up with those, we have to refresh
-			// the mails once after the initial load. (async)
-			this._loadMailSummariesAndPublish()
-		})
+		this.once(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
+			this._doAfterInitialLoad()
+		)
 
+		await this._connectWithRetry(configWithListener)
+
+		// Load all messages. ASYNC, return control flow after connecting.
+		this._loadMailSummariesAndPublish()
+	}
+
+	async _connectWithRetry(configWithListener) {
 		try {
 			await retry(
 				async _bail => {
 					// If anything throws, we retry
 					this.connection = await imaps.connect(configWithListener)
+
+					this.connection.on('error', err => {
+						// We assume that the app will be restarted after a crash.
+						console.error(
+							'got fatal error during imap operation, stop app.',
+							err
+						)
+						this.emit('error', err)
+					})
+
 					await this.connection.openBox('INBOX')
+					debug('connected to imap')
 				},
 				{
 					retries: 5
@@ -60,30 +71,29 @@ class ImapFetcher extends EventEmitter {
 			console.error('can not connect, even with retry, stop app', error)
 			throw error
 		}
+	}
 
-		this.connection.on('error', err => {
-			// We assume that the app will be restarted after a crash.
-			console.error('got fatal error during imap operation, stop app.', err)
-			this.emit('error', err)
-		})
-		debug('connected to imap')
+	_doOnNewMail() {
+		// Only react to new mails after the initial load, otherwise it might load the same mails twice.
+		if (this.initialLoadDone) {
+			this._loadMailSummariesAndPublish()
+		}
+	}
+
+	_doAfterInitialLoad() {
+		// During initial load we ignored new incoming emails. In order to catch up with those, we have to refresh
+		// the mails once after the initial load. (async)
+		this._loadMailSummariesAndPublish()
 
 		// If the above trigger on new mails does not work reliable, we have to regularly check
 		// for new mails on the server. This is done only after all the mails have been loaded for the
 		// first time. (Note: set the refresh higher than the time it takes to download the mails).
 		if (this.config.imap.refreshIntervalSeconds) {
-			this.once('all mails loaded', () => {
-				setInterval(
-					() => this._loadMailSummariesAndPublish(),
-					this.config.imap.refreshIntervalSeconds * 1000
-				)
-			})
+			setInterval(
+				() => this._loadMailSummariesAndPublish(),
+				this.config.imap.refreshIntervalSeconds * 1000
+			)
 		}
-
-		// Load all messages. ASYNC, return control flow after connecting.
-		this._loadMailSummariesAndPublish()
-
-		return this.connection
 	}
 
 	async _loadMailSummariesAndPublish() {
@@ -102,12 +112,52 @@ class ImapFetcher extends EventEmitter {
 		)
 
 		await pSeries(fetchFunctions)
-		this.initialLoadDone = true
-		this.emit('all mails loaded')
+
+		if (!this.initialLoadDone) {
+			this.initialLoadDone = true
+			this.emit(ImapService.EVENT_INITIAL_LOAD_DONE)
+		}
 	}
 
-	addNewMailListener(cb) {
-		this.on('mail', cb)
+	/**
+	 *
+	 * @param {Date} deleteMailsBefore delete mails before this date instance
+	 */
+	async deleteOldMails(deleteMailsBefore) {
+		debug(`deleting mails before ${deleteMailsBefore}`)
+		const uids = await this._searchWithoutFetch([
+			['!DELETED'],
+			['BEFORE', deleteMailsBefore]
+		])
+		if (uids.length === 0) {
+			return
+		}
+
+		debug(`deleting mails ${uids}`)
+		await this.connection.deleteMessage(uids)
+		console.log(`deleted ${uids.length} old messages.`)
+
+		uids.forEach(uid => this.emit(ImapService.EVENT_DELETED_MAIL, uid))
+	}
+
+	/**
+	 *
+	 * @param {Object} searchCriteria (see ImapSimple#search)
+	 * @returns {Promise<Array<Int>>} Array of UIDs
+	 * @private
+	 */
+	async _searchWithoutFetch(searchCriteria) {
+		const imapUnderlying = this.connection.imap
+
+		return new Promise((resolve, reject) => {
+			imapUnderlying.search(searchCriteria, (err, uids) => {
+				if (err) {
+					reject(err)
+				} else {
+					resolve(uids || [])
+				}
+			})
+		})
 	}
 
 	_createMailSummary(message) {
@@ -158,28 +208,20 @@ class ImapFetcher extends EventEmitter {
 	}
 
 	async _getAllUids() {
-		// Imap-simple does not expose the underlying connection yet.
-		const imapUnderlying = this.connection.imap
-		return new Promise((resolve, reject) => {
-			imapUnderlying.search(['ALL'], (err, uids) => {
-				if (err) {
-					reject(err)
-					return
-				}
-
-				// Get newest messages first, order DESC
-				resolve(uids.sort().reverse())
-			})
-		})
+		const uids = await this._searchWithoutFetch([['!DELETED']])
+		// Create copy to not mutate the original array
+		return [...uids].sort().reverse()
 	}
 
 	async _getMailHeadersAndPublish(uids) {
 		try {
 			const mails = await this._getMailHeaders(uids)
-			debug('fetched uids: ', uids)
 			mails.forEach(mail => {
 				this.loadedUids.add(mail.attributes.uid)
-				return this.emit('mail', this._createMailSummary(mail))
+				return this.emit(
+					ImapService.EVENT_NEW_MAIL,
+					this._createMailSummary(mail)
+				)
 			})
 		} catch (error) {
 			debug('can not fetch', error)
@@ -188,7 +230,6 @@ class ImapFetcher extends EventEmitter {
 	}
 
 	async _getMailHeaders(uids) {
-		debug('fetching uid', uids)
 		const fetchOptions = {
 			bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
 			struct: false
@@ -198,4 +239,9 @@ class ImapFetcher extends EventEmitter {
 	}
 }
 
-module.exports = ImapFetcher
+ImapService.EVENT_NEW_MAIL = 'mail'
+ImapService.EVENT_DELETED_MAIL = 'mailDeleted'
+ImapService.EVENT_INITIAL_LOAD_DONE = 'initial load done'
+ImapService.EVENT_ERROR = 'error'
+
+module.exports = ImapService

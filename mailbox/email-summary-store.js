@@ -1,3 +1,4 @@
+const debug = require('debug')('void-mail:mail-summary-store')
 const MultiMap = require('mnemonist/multi-map')
 const _ = require('lodash')
 
@@ -26,6 +27,22 @@ class EmailSummaryStore {
 
 	add(to, mailSummary) {
 		this.mailSummaries.set(to.toLowerCase(), mailSummary)
+	}
+
+	removeUid(uid) {
+		// TODO: make this more efficient, looping through each email is not cool.
+		this.mailSummaries.forEachAssociation((mails, to) => {
+			mails
+				.filter(mail => mail.uid === uid)
+				.forEach(mail => {
+					this.mailSummaries.remove(to, mail)
+					debug('removed ', mail.date, to, mail.subject)
+				})
+		})
+	}
+
+	mailCount() {
+		return this.mailSummaries.size
 	}
 }
 

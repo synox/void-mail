@@ -47,22 +47,19 @@ IMAP_SERVER | String | The imap server address. (e.g. `imap.example.com`)
 IMAP_USER | String | The username used to sign into the imap server. 
 IMAP_PASSWORD | String | The password used to sign into the imap server.
 IMAP_REFRESH_INTERVAL_SECONDS | Integer | How often to check for new messages on the imap server. (default: `undefined`) Usually the application reacts immediately to new arrived mail.
-PORT | Integer | On which port to run the http interface. (`default: 3000`)
+PORT | Integer | On which port to run the http interface. (default: `3000`)
+DELETE_MAILS_OLDER_THAN_DAYS | Integer | How many days to to wait before deleting messages. (default: `30`)
 
 
 ## TODO
 
 This mostly works, but some things need to be done:
 
-- delete mails after X days. (with config)
-
 Cleanup:
 -   error handling everywhere (how to verify that all promises are catched, and eventEmitter have on-error?)
--   reduce code base, if possible
 
 Features:
 - better random names
-
 
 Testing:
 -   provide config for fixed data for offline testing
@@ -94,8 +91,9 @@ Maybe Later:
     
     https://www.npmjs.com/search?q=imap%20stream
 
-
-http://ignorethecode.net/blog/2010/02/02/removing-features/
+-   reduce code base, if possible
+    
+    http://ignorethecode.net/blog/2010/02/02/removing-features/
 
 ## Team
 
