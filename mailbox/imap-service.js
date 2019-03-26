@@ -36,7 +36,7 @@ class ImapService extends EventEmitter {
 
 		this.once('initial load done', () => this._doAfterInitialLoad())
 
-		await this._connectWithRetry(configWithListener);
+		await this._connectWithRetry(configWithListener)
 
 		// Load all messages. ASYNC, return control flow after connecting.
 		this._loadMailSummariesAndPublish()
@@ -53,7 +53,10 @@ class ImapService extends EventEmitter {
 
 					this.connection.on('error', err => {
 						// We assume that the app will be restarted after a crash.
-						console.error('got fatal error during imap operation, stop app.', err)
+						console.error(
+							'got fatal error during imap operation, stop app.',
+							err
+						)
 						this.emit('error', err)
 					})
 
@@ -71,7 +74,7 @@ class ImapService extends EventEmitter {
 	}
 
 	_doOnNewMail() {
-// Only react to new mails after the initial load, otherwise it might load the same mails twice.
+		// Only react to new mails after the initial load, otherwise it might load the same mails twice.
 		if (this.initialLoadDone) {
 			this._loadMailSummariesAndPublish()
 		}
@@ -112,7 +115,6 @@ class ImapService extends EventEmitter {
 		if (!this.initialLoadDone) {
 			this.initialLoadDone = true
 			this.emit('initial load done')
-
 		}
 	}
 
@@ -137,16 +139,15 @@ class ImapService extends EventEmitter {
 	 * @param {Date} deleteMailsBefore delete mails before this date instance
 	 */
 	async deleteOldMails(deleteMailsBefore) {
-
 		const uids = await this._searchWithoutFetch([['BEFORE', deleteMailsBefore]])
-		return Promise.all(
-			uids.map(async uid => {
-				let mail = await this.fetchOneFullMail('todo', uid)
-				console.error('would now delete ', uid, mail.subject, mail.date)
-				// return this.deleteMail(uid); // TODO: make hot
-				return new Promise((resolve)=>resolve(null))
-			})
+
+		// Run delete in sequence to not overload the server. uids.map must return a function,
+		// that is then called by pSeries.
+		const deletePromise = await pSeries(
+			uids.map(uid => () => this.deleteMail(uid))
 		)
+		console.log(`deleted ${uids.length} old messages.`)
+		return deletePromise
 	}
 
 	/**
@@ -158,14 +159,13 @@ class ImapService extends EventEmitter {
 	async _searchWithoutFetch(searchCriteria) {
 		const imapUnderlying = this.connection.imap
 
-		return new Promise(function (resolve, reject) {
-			imapUnderlying.search(searchCriteria, function (err, uids) {
+		return new Promise((resolve, reject) => {
+			imapUnderlying.search(searchCriteria, (err, uids) => {
 				if (err) {
-					reject(err);
-					return;
+					reject(err)
+				} else {
+					resolve(uids || [])
 				}
-
-				resolve(uids || []);
 			})
 		})
 	}
@@ -202,9 +202,7 @@ class ImapService extends EventEmitter {
 		debug(`fetching full message ${uid}`)
 
 		// For security we also filter TO, so it is harder to just enumerate all messages.
-		const searchCriteria = [['UID', uid]
-			// ['TO', to]
-		]
+		const searchCriteria = [['UID', uid][('TO', to)]]
 		const fetchOptions = {
 			bodies: ['HEADER', ''], // Empty string means full body
 			markSeen: false

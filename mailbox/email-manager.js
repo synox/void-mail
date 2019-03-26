@@ -25,12 +25,10 @@ class EmailManager extends EventEmitter {
 
 		this.imapService.on('error', err => this.emit('error', err))
 
-		// delete old mails after all mails have been loaded
-		this.imapService.once('initial load done', ()=> this._deleteOldMails())
+		this.imapService.once('initial load done', () => this._deleteOldMails())
 
-
-		// delete old messages every few hours
-		setInterval(() => this._deleteOldMails(), 1000*3600*6)
+		// Delete old messages now and then every few hours
+		setInterval(() => this._deleteOldMails(), 1000 * 3600 * 6)
 	}
 
 	async connectImapAndAutorefresh() {
@@ -61,7 +59,13 @@ class EmailManager extends EventEmitter {
 	}
 
 	async _deleteOldMails() {
-		this.imapService.deleteOldMails(daysAgo(this.config.imap.deleteMailsOlderThanDays))
+		try {
+			await this.imapService.deleteOldMails(
+				daysAgo(this.config.imap.deleteMailsOlderThanDays)
+			)
+		} catch (error) {
+			console.log('can not delete old messages', error)
+		}
 	}
 
 	_saveToFile(mails, filename) {
