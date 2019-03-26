@@ -1,6 +1,8 @@
 const config = {
 	email: {
-		domain: process.env.DOMAIN
+		domain: process.env.DOMAIN,
+		deleteMailsOlderThanDays: process.env.DELETE_MAILS_OLDER_THAN_DAYS || 30
+
 	},
 	imap: {
 		user: process.env.IMAP_USER,
@@ -9,8 +11,7 @@ const config = {
 		port: 993,
 		tls: true,
 		authTimeout: 3000,
-		refreshIntervalSeconds: process.env.IMAP_REFRESH_INTERVAL_SECONDS,
-		deleteMailsOlderThanDays: 30
+		refreshIntervalSeconds: process.env.IMAP_REFRESH_INTERVAL_SECONDS
 	},
 	http: {port: normalizePort(process.env.PORT || '3000')}
 }

@@ -78,7 +78,7 @@ class EmailManager extends EventEmitter {
 	async _deleteOldMails() {
 		try {
 			await this.imapService.deleteOldMails(
-				moment().subtract(this.config.imap.deleteMailsOlderThanDays, 'days').toDate()
+				moment().subtract(this.config.email.deleteMailsOlderThanDays, 'days').toDate()
 			)
 		} catch (error) {
 			console.log('can not delete old messages', error)
