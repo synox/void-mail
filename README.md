@@ -104,4 +104,4 @@ Maybe Later:
 
 ## License
 
-GPL © [Aravindo Wingeier](https://github.com/synox)
+GPL-3.0 © [Aravindo Wingeier](https://github.com/synox)
