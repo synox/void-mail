@@ -34,7 +34,7 @@ class ImapService extends EventEmitter {
 			onmail: () => this._doOnNewMail()
 		}
 
-		this.once('initial load done', () => this._doAfterInitialLoad())
+		this.once(ImapService.EVENT_INITIAL_LOAD_DONE, () => this._doAfterInitialLoad())
 
 		await this._connectWithRetry(configWithListener)
 
@@ -114,22 +114,9 @@ class ImapService extends EventEmitter {
 		await pSeries(fetchFunctions)
 		if (!this.initialLoadDone) {
 			this.initialLoadDone = true
-			this.emit('initial load done')
+			this.emit(ImapService.EVENT_INITIAL_LOAD_DONE)
 		}
 	}
-
-	addNewMailListener(cb) {
-		this.on('mail', cb)
-	}
-
-	addInitialLoadDOneListener(cb) {
-		this.on('initial load done', cb)
-	}
-
-	addMailDeletedListener(cb) {
-		this.on('mailDeleted', cb)
-	}
-
 
 	/**
 	 *
@@ -146,7 +133,7 @@ class ImapService extends EventEmitter {
 		await this.connection.deleteMessage(uids)
 		console.log(`deleted ${uids.length} old messages.`)
 
-		uids.forEach(uid => this.emit('mailDeleted', uid))
+		uids.forEach(uid => this.emit(ImapService.EVENT_DELETED_MAIL, uid))
 	}
 
 	/**
@@ -227,7 +214,7 @@ class ImapService extends EventEmitter {
 			const mails = await this._getMailHeaders(uids)
 			mails.forEach(mail => {
 				this.loadedUids.add(mail.attributes.uid)
-				return this.emit('mail', this._createMailSummary(mail))
+				return this.emit(ImapService.EVENT_NEW_MAIL, this._createMailSummary(mail))
 			})
 		} catch (error) {
 			debug('can not fetch', error)
@@ -244,5 +231,10 @@ class ImapService extends EventEmitter {
 		return this.connection.search(searchCriteria, fetchOptions)
 	}
 }
+
+ImapService.EVENT_NEW_MAIL = 'mail'
+ImapService.EVENT_DELETED_MAIL = 'mailDeleted'
+ImapService.EVENT_INITIAL_LOAD_DONE = 'initial load done'
+ImapService.EVENT_ERROR = 'error'
 
 module.exports = ImapService

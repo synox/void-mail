@@ -24,9 +24,9 @@ class EmailManager extends EventEmitter {
 			{maxAge: 10 * 60 * 1000}
 		)
 
-		this.imapService.on('error', err => this.emit('error', err))
+		this.imapService.on(ImapService.EVENT_ERROR, err => this.emit('error', err))
 
-		this.imapService.once('initial load done', () => this._deleteOldMails())
+		this.imapService.once(ImapService.EVENT_INITIAL_LOAD_DONE, () => this._deleteOldMails())
 
 		// Delete old messages now and then every few hours
 		setInterval(() => this._deleteOldMails(), 1000 * 3600 * 6)
@@ -34,9 +34,9 @@ class EmailManager extends EventEmitter {
 
 	async connectImapAndAutorefresh() {
 		// First add the listener, so we don't miss any messages:
-		this.imapService.addNewMailListener(mail => this._onNewMail(mail))
-		this.imapService.addInitialLoadDOneListener(() => this._onInitialLoadDone())
-		this.imapService.addMailDeletedListener(mail => this._onMailDeleted(mail))
+		this.imapService.on(ImapService.EVENT_NEW_MAIL, mail => this._onNewMail(mail))
+		this.imapService.on(ImapService.EVENT_INITIAL_LOAD_DONE,() => this._onInitialLoadDone())
+		this.imapService.on(ImapService.EVENT_DELETED_MAIL, mail => this._onMailDeleted(mail))
 
 		await this.imapService.connectAndLoad()
 	}
