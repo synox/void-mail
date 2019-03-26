@@ -142,7 +142,7 @@ class ImapService extends EventEmitter {
 
 	/**
 	 *
-	 * @param searchCriteria (see ImapSimple#search)
+	 * @param {Object} searchCriteria (see ImapSimple#search)
 	 * @returns {Promise<Array<Int>>} Array of UIDs
 	 * @private
 	 */
