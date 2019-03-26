@@ -122,8 +122,20 @@ class ImapService extends EventEmitter {
 		this.on('mail', cb)
 	}
 
-	async deleteMail(uid) {
-		return this.connection.addFlags(uid, '\\Deleted')
+	addInitialLoadDOneListener(cb) {
+		this.on('initial load done', cb)
+	}
+
+	addMailDeletedListener(cb) {
+		this.on('mailDeleted', cb)
+	}
+
+	async deleteMails(uids) {
+		if (!uids.length) {
+			return
+		}
+		debug(`deleting mails ${uids}`)
+		return this.connection.addFlags(uids, '\\Deleted')
 
 		// TODO: expunge() once in a while
 		/*
@@ -139,15 +151,15 @@ class ImapService extends EventEmitter {
 	 * @param {Date} deleteMailsBefore delete mails before this date instance
 	 */
 	async deleteOldMails(deleteMailsBefore) {
-		const uids = await this._searchWithoutFetch([['BEFORE', deleteMailsBefore]])
+		debug(`deleting mails before ${deleteMailsBefore}`)
+		const uids = await this._searchWithoutFetch([['!DELETED'], ['BEFORE', deleteMailsBefore]])
+		if (!uids.length) {
+			return
+		}
 
-		// Run delete in sequence to not overload the server. uids.map must return a function,
-		// that is then called by pSeries.
-		const deletePromise = await pSeries(
-			uids.map(uid => () => this.deleteMail(uid))
-		)
+		await this.deleteMails(uids)
 		console.log(`deleted ${uids.length} old messages.`)
-		return deletePromise
+		uids.forEach(uid => this.emit('mailDeleted', uid))
 	}
 
 	/**
@@ -202,7 +214,7 @@ class ImapService extends EventEmitter {
 		debug(`fetching full message ${uid}`)
 
 		// For security we also filter TO, so it is harder to just enumerate all messages.
-		const searchCriteria = [['UID', uid][('TO', to)]]
+		const searchCriteria = [['UID', uid], ['TO', to]]
 		const fetchOptions = {
 			bodies: ['HEADER', ''], // Empty string means full body
 			markSeen: false
@@ -236,7 +248,6 @@ class ImapService extends EventEmitter {
 	async _getMailHeadersAndPublish(uids) {
 		try {
 			const mails = await this._getMailHeaders(uids)
-			debug('fetched uids: ', uids)
 			mails.forEach(mail => {
 				this.loadedUids.add(mail.attributes.uid)
 				return this.emit('mail', this._createMailSummary(mail))
@@ -248,7 +259,6 @@ class ImapService extends EventEmitter {
 	}
 
 	async _getMailHeaders(uids) {
-		debug('fetching uid', uids)
 		const fetchOptions = {
 			bodies: ['HEADER.FIELDS (FROM TO SUBJECT DATE)'],
 			struct: false

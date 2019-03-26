@@ -16,6 +16,7 @@ class EmailManager extends EventEmitter {
 		this.imapService = new ImapService(config)
 		this.summaryStore = new EmailSummaryStore()
 		this.clientNotification = clientNotification
+		this.initialLoadDone = false
 
 		// Cached methods:
 		this.cachedFetchFullMail = mem(
@@ -34,6 +35,8 @@ class EmailManager extends EventEmitter {
 	async connectImapAndAutorefresh() {
 		// First add the listener, so we don't miss any messages:
 		this.imapService.addNewMailListener(mail => this._onNewMail(mail))
+		this.imapService.addInitialLoadDOneListener(() => this._onInitialLoadDone())
+		this.imapService.addMailDeletedListener(mail => this._onMailDeleted(mail))
 
 		await this.imapService.connectAndLoad()
 	}
@@ -50,12 +53,26 @@ class EmailManager extends EventEmitter {
 		return this.summaryStore.getAll()
 	}
 
+	_onInitialLoadDone() {
+		this.initialLoadDone = true
+		console.log(`initial load done, got ${this.summaryStore.mailCount()} mails`)
+	}
+
 	_onNewMail(mail) {
-		debug('new mail for', mail.to[0])
+		if (this.initialLoadDone) {
+			// for now, only log messages if they arrive after the initial load
+			debug('new mail for', mail.to[0])
+		}
 		mail.to.forEach(to => {
 			this.summaryStore.add(to, mail)
 			return this.clientNotification.emit(to)
 		})
+	}
+
+	_onMailDeleted(uid) {
+		debug('mail deleted with uid', uid)
+		this.summaryStore.removeUid(uid)
+		// no client notification required, as nobody can cold a connection for 30+ days.
 	}
 
 	async _deleteOldMails() {
