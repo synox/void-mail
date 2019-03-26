@@ -129,7 +129,7 @@ class ImapService extends EventEmitter {
 			['!DELETED'],
 			['BEFORE', deleteMailsBefore]
 		])
-		if (!uids.length) {
+		if (uids.length === 0) {
 			return
 		}
 
