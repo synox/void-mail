@@ -135,15 +135,7 @@ class ImapService extends EventEmitter {
 			return
 		}
 		debug(`deleting mails ${uids}`)
-		return this.connection.addFlags(uids, '\\Deleted')
-
-		// TODO: expunge() once in a while
-		/*
-		expunge([< MessageSource >uids, ]< function >callback) - (void) -
-		Permanently removes all messages flagged as Deleted in the currently open mailbox.
-		 If the server supports the 'UIDPLUS' capability, uids can be supplied to only remove messages
-		 that both have their uid in uids and have the \Deleted flag set. callback has 1 parameter: < Error >err.
-		 */
+		return this.connection.deleteMessage(uids)
 	}
 
 	/**
