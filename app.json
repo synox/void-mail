@@ -22,6 +22,9 @@
     },
     "IMAP_REFRESH_INTERVAL_SECONDS": {
       "description": "How often to refresh the imap messages manually"
+    },
+    "DELETE_MAILS_OLDER_THAN_DAYS": {
+      "description": "How many days to to wait before deleting messages. (default: `30`)"
     }
   }
 }

@@ -1,3 +1,5 @@
+// Note: Also update app.json and README.md!
+
 const config = {
 	email: {
 		domain: process.env.DOMAIN,
