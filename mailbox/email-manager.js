@@ -25,7 +25,12 @@ class EmailManager extends EventEmitter {
 
 		this.imapService.on('error', err => this.emit('error', err))
 
-		setInterval(() => this._deleteOldMails(), 3600)
+		// delete old mails after all mails have been loaded
+		this.imapService.once('all mails loaded', ()=> this._deleteOldMails())
+
+
+		// delete old messages every few hours
+		setInterval(() => this._deleteOldMails(), 1000*3600*6)
 	}
 
 	async connectImapAndAutorefresh() {

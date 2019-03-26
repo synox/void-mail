@@ -131,7 +131,8 @@ class ImapService extends EventEmitter {
 		const uids = await this._searchWithoutFetch([['BEFORE', deleteMailsBefore]])
 		return Promise.all(
 			uids.map(async uid => {
-				console.error('would now delete ', uid)
+				let mail = this._createMailSummary(await this.fetchOneFullMail('todo', uid))
+				console.error('would now delete ', uid, mail.subject, mail.date)
 				// return this.deleteMail(uid); // TODO: make hot
 				return new Promise()
 			})
@@ -191,7 +192,9 @@ class ImapService extends EventEmitter {
 		debug(`fetching full message ${uid}`)
 
 		// For security we also filter TO, so it is harder to just enumerate all messages.
-		const searchCriteria = [['UID', uid], ['TO', to]]
+		const searchCriteria = [['UID', uid],
+			// ['TO', to]
+		]
 		const fetchOptions = {
 			bodies: ['HEADER', ''], // Empty string means full body
 			markSeen: false
