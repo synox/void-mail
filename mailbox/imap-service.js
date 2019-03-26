@@ -40,8 +40,6 @@ class ImapService extends EventEmitter {
 
 		// Load all messages. ASYNC, return control flow after connecting.
 		this._loadMailSummariesAndPublish()
-
-		return this.connection
 	}
 
 	async _connectWithRetry(configWithListener) {
@@ -112,6 +110,7 @@ class ImapService extends EventEmitter {
 		)
 
 		await pSeries(fetchFunctions)
+
 		if (!this.initialLoadDone) {
 			this.initialLoadDone = true
 			this.emit(ImapService.EVENT_INITIAL_LOAD_DONE)
