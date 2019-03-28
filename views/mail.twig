@@ -8,7 +8,7 @@
     <a href="/{{ address }}"> ← Return to inbox</a>
     <div style="float: right"><a href="/login"> logout</a></div>
     <h1>{{ mail.subject }}</h1>
-    <h2>{{ mail.from.text }}</h2>
+    <h3>{{ mail.from.text }}</h3>
     <h3>{{ mail.date| date }}</h3>
     <hr>
     {% if mail.html %}
