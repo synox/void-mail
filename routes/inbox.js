@@ -40,6 +40,8 @@ router.get(
 				req.params.uid
 			)
 			if (mail) {
+				// emails are immutable, cache if found
+				res.set('Cache-Control', 'private, max-age=600');
 				res.render('mail', {
 					title: req.params.address,
 					address: req.params.address,
