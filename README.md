@@ -75,5 +75,3 @@ Maybe Later:
 ## License
 
 GPL-3.0 © [Aravindo Wingeier](https://github.com/synox)
-
-[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail?ref=badge_large)
