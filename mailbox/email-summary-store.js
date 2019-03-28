@@ -3,7 +3,7 @@ const MultiMap = require('mnemonist/multi-map')
 const _ = require('lodash')
 
 /**
- * In-Memory store/cache fo the email summaries (headers, without the full body).
+ * In-Memory store/cache for the email summaries (headers, without the full body).
  *
  * You might be tempted to also store all the mail bodies here, but this would bloat the
  * memory. It would be better to use Redis or Mongo to save this in a different process.
