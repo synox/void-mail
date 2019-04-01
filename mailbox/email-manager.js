@@ -72,8 +72,8 @@ class EmailManager extends EventEmitter {
 			debug('new mail for', mail.to[0])
 		}
 
+		this.summaryStore.add(mail)
 		mail.to.forEach(to => {
-			this.summaryStore.add(to, mail)
 			return this.clientNotification.emit(to)
 		})
 	}

@@ -17,6 +17,7 @@
     "http-errors": "~1.6.2",
     "imap-simple": "synox/imap-simple#feature/delete",
     "lodash": "^4.17.11",
+    "lokijs": "^1.5.6",
     "mailparser": "^2.4.3",
     "mem": "^4.2.0",
     "mnemonist": "^0.27.2",
