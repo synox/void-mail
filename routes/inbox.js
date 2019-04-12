@@ -11,14 +11,6 @@ const sanitizeAddress = sanitizeParam('address').customSanitizer(
 	}
 )
 
-router.get('/all', (req, res, _next) => {
-	const emailManager = req.app.get('emailManager')
-	res.render('inbox', {
-		title: 'All Mailboxes',
-		address: 'all mails',
-		mailSummaries: emailManager.getAllMailSummaries()
-	})
-})
 
 router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, _next) => {
 	const emailManager = req.app.get('emailManager')
