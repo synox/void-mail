@@ -40,7 +40,7 @@ app.set('twig options', {
 
 // Application code:
 app.use(
-	express.static(path.join(__dirname, 'public'), {
+	express.static(path.join(__dirname, '../public'), {
 		immutable: true,
 		maxAge: '1h'
 	})
