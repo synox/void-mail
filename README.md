@@ -56,6 +56,11 @@ DELETE_MAILS_OLDER_THAN_DAYS | Integer | How many days to to wait before deletin
 
 This mostly works, but some things need to be done:
 
+
+typescript:
+   - https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html
+    
+    
 Testing:
 -   create unit/integration tests
 
