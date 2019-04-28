@@ -2,21 +2,15 @@ const EventEmitter = require('events')
 const debug = require('debug')('void-mail:imap-manager')
 const mem = require('mem')
 const moment = require('moment')
-const ImapService = require('./imap-service')
-const EmailSummaryStore = require('./email-summary-store')
+const ImapService = require('../application/imap-service')
 
-/**
- * Fetches mails from imap, caches them and provides methods to access them. Also notifies the users via websockets about
- * new messages.
- */
-class EmailManager extends EventEmitter {
-	constructor(config, clientNotification) {
+class MailService extends EventEmitter {
+	constructor(mailRepository, imapService, clientNotification, config) {
 		super()
-		this.config = config
-		this.imapService = new ImapService(config)
-		this.summaryStore = new EmailSummaryStore()
+		this.mailRepository = mailRepository
 		this.clientNotification = clientNotification
-		this.initialLoadDone = false
+		this.imapService = imapService
+		this.config = config
 
 		// Cached methods:
 		this.cachedFetchFullMail = mem(
@@ -24,33 +18,17 @@ class EmailManager extends EventEmitter {
 			{maxAge: 10 * 60 * 1000}
 		)
 
-		this.imapService.on(ImapService.EVENT_ERROR, err => this.emit('error', err))
+		this.initialLoadDone = false
 
+		// Delete old messages now and every few hours
 		this.imapService.once(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
 			this._deleteOldMails()
 		)
-
-		// Delete old messages now and then every few hours
 		setInterval(() => this._deleteOldMails(), 1000 * 3600 * 6)
 	}
 
-	async connectImapAndAutorefresh() {
-		// First add the listener, so we don't miss any messages:
-		this.imapService.on(ImapService.EVENT_NEW_MAIL, mail =>
-			this._onNewMail(mail)
-		)
-		this.imapService.on(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
-			this._onInitialLoadDone()
-		)
-		this.imapService.on(ImapService.EVENT_DELETED_MAIL, mail =>
-			this._onMailDeleted(mail)
-		)
-
-		await this.imapService.connectAndLoad()
-	}
-
 	getMailSummaries(address) {
-		return this.summaryStore.getForRecipient(address)
+		return this.mailRepository.getForRecipient(address)
 	}
 
 	getOneFullMail(address, uid) {
@@ -58,29 +36,31 @@ class EmailManager extends EventEmitter {
 	}
 
 	getAllMailSummaries() {
-		return this.summaryStore.getAll()
+		return this.mailRepository.getAll()
 	}
 
-	_onInitialLoadDone() {
+	onInitialLoadDone() {
 		this.initialLoadDone = true
-		console.log(`initial load done, got ${this.summaryStore.mailCount()} mails`)
+		console.log(
+			`initial load done, got ${this.mailRepository.mailCount()} mails`
+		)
 	}
 
-	_onNewMail(mail) {
+	onNewMail(mail) {
 		if (this.initialLoadDone) {
 			// For now, only log messages if they arrive after the initial load
 			debug('new mail for', mail.to[0])
 		}
 
 		mail.to.forEach(to => {
-			this.summaryStore.add(to, mail)
+			this.mailRepository.add(to, mail)
 			return this.clientNotification.emit(to)
 		})
 	}
 
-	_onMailDeleted(uid) {
+	onMailDeleted(uid) {
 		debug('mail deleted with uid', uid)
-		this.summaryStore.removeUid(uid)
+		this.mailRepository.remoeUid(uid)
 		// No client notification required, as nobody can cold a connection for 30+ days.
 	}
 
@@ -106,4 +86,4 @@ class EmailManager extends EventEmitter {
 	}
 }
 
-module.exports = EmailManager
+module.exports = MailService

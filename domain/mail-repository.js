@@ -2,14 +2,7 @@ const debug = require('debug')('void-mail:mail-summary-store')
 const MultiMap = require('mnemonist/multi-map')
 const _ = require('lodash')
 
-/**
- * In-Memory store/cache for the email summaries (headers, without the full body).
- *
- * You might be tempted to also store all the mail bodies here, but this would bloat the
- * memory. It would be better to use Redis or Mongo to save this in a different process.
- * But we don't, because we try to keep things simple.
- */
-class EmailSummaryStore {
+class MailRepository {
 	constructor() {
 		// MultiMap docs: https://yomguithereal.github.io/mnemonist/multi-map
 		this.mailSummaries = new MultiMap()
@@ -46,4 +39,4 @@ class EmailSummaryStore {
 	}
 }
 
-module.exports = EmailSummaryStore
+module.exports = MailRepository

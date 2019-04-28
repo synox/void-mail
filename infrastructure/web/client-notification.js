@@ -1,5 +1,6 @@
 const EventEmitter = require('events')
 const debug = require('debug')('void-mail:notification')
+
 /**
  * Receives sign-ins from users and notifies them when new mails are available.
  */

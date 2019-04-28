@@ -12,11 +12,11 @@ const sanitizeAddress = sanitizeParam('address').customSanitizer(
 )
 
 router.get('^/:address([^@/]+@[^@/]+)', sanitizeAddress, (req, res, _next) => {
-	const emailManager = req.app.get('emailManager')
+	const mailService = req.app.get('mailService')
 	res.render('inbox', {
 		title: req.params.address,
 		address: req.params.address,
-		mailSummaries: emailManager.getMailSummaries(req.params.address)
+		mailSummaries: mailService.getMailSummaries(req.params.address)
 	})
 })
 
@@ -25,8 +25,8 @@ router.get(
 	sanitizeAddress,
 	async (req, res, next) => {
 		try {
-			const emailManager = req.app.get('emailManager')
-			const mail = await emailManager.getOneFullMail(
+			const mailService = req.app.get('mailService')
+			const mail = await mailService.getOneFullMail(
 				req.params.address,
 				req.params.uid
 			)

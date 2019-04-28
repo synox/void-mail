@@ -5,8 +5,8 @@ const addressparser = require('nodemailer/lib/addressparser')
 const pSeries = require('p-series')
 const retry = require('async-retry')
 const debug = require('debug')('void-mail:imap')
-
 const _ = require('lodash')
+const Mail = require('../domain/mail')
 
 /**
  * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
@@ -173,14 +173,7 @@ class ImapService extends EventEmitter {
 		const date = headerPart.date[0]
 		const {uid} = message.attributes
 
-		return {
-			raw: message,
-			to,
-			from,
-			date,
-			subject,
-			uid
-		}
+		return Mail.create(to, from, date, subject, uid)
 	}
 
 	async fetchOneFullMail(to, uid) {
