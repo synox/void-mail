@@ -2,9 +2,9 @@ const EventEmitter = require('events')
 const debug = require('debug')('void-mail:imap-manager')
 const mem = require('mem')
 const moment = require('moment')
-const ImapService = require('../application/imap-service')
+const ImapService = require('./imap-service')
 
-class MailService extends EventEmitter {
+class MailProcessingService extends EventEmitter {
 	constructor(mailRepository, imapService, clientNotification, config) {
 		super()
 		this.mailRepository = mailRepository
@@ -60,7 +60,7 @@ class MailService extends EventEmitter {
 
 	onMailDeleted(uid) {
 		debug('mail deleted with uid', uid)
-		this.mailRepository.remoeUid(uid)
+		this.mailRepository.removeUid(uid)
 		// No client notification required, as nobody can cold a connection for 30+ days.
 	}
 
@@ -86,4 +86,4 @@ class MailService extends EventEmitter {
 	}
 }
 
-module.exports = MailService
+module.exports = MailProcessingService

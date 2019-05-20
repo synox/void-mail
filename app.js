@@ -9,41 +9,42 @@ require('array.prototype.flatmap').shim()
 const {app, io} = require('./infrastructure/web/web')
 const ClientNotification = require('./infrastructure/web/client-notification')
 const ImapService = require('./application/imap-service')
-const MailService = require('./application/mail-service')
+const MailProcessingService = require('./application/mail-processing-service')
 const MailRepository = require('./domain/mail-repository')
 
 const clientNotification = new ClientNotification()
 clientNotification.use(io)
 
 const imapService = new ImapService(config)
-const mailService = new MailService(
+const mailProcessingService = new MailProcessingService(
 	new MailRepository(),
 	imapService,
 	clientNotification,
 	config
 )
 
-imapService.on(ImapService.EVENT_NEW_MAIL, mail => mailService.onNewMail(mail))
+// Put everything together:
+imapService.on(ImapService.EVENT_NEW_MAIL, mail => mailProcessingService.onNewMail(mail))
 imapService.on(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
-	mailService.onInitialLoadDone()
+	mailProcessingService.onInitialLoadDone()
 )
 imapService.on(ImapService.EVENT_DELETED_MAIL, mail =>
-	mailService.onMailDeleted(mail)
+	mailProcessingService.onMailDeleted(mail)
 )
 
-mailService.on('error', err => {
-	console.error('error from mailService, stopping.', err)
+mailProcessingService.on('error', err => {
+	console.error('error from mailProcessingService, stopping.', err)
 	process.exit(1)
 })
 
 imapService.on(ImapService.EVENT_ERROR, error => {
 	console.error('fatal error from imap service', error)
-	return process.exit(1)
+	process.exit(1)
 })
 
-app.set('mailService', mailService)
+app.set('mailProcessingService', mailProcessingService)
 
-imapService.connectAndLoad().catch(error => {
+imapService.connectAndLoadMessages().catch(error => {
 	console.error('fatal error from imap service', error)
-	return process.exit(1)
+	process.exit(1)
 })

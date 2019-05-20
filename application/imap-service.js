@@ -10,7 +10,9 @@ const Mail = require('../domain/mail')
 
 /**
  * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
- * as a member field.
+ * as a member field. 
+ * 
+ * With this abstraction it would be easy to replace this with any inbound mail service like mailgun.com. 
  */
 class ImapService extends EventEmitter {
 	constructor(config) {
@@ -27,7 +29,7 @@ class ImapService extends EventEmitter {
 		this.initialLoadDone = false
 	}
 
-	async connectAndLoad() {
+	async connectAndLoadMessages() {
 		const configWithListener = {
 			...this.config,
 			// 'onmail' adds a callback when new mails arrive. With this we can keep the imap refresh interval very low (or even disable it).
@@ -40,8 +42,8 @@ class ImapService extends EventEmitter {
 
 		await this._connectWithRetry(configWithListener)
 
-		// Load all messages. ASYNC, return control flow after connecting.
-		this._loadMailSummariesAndPublish()
+		// Load all messages in the background. (ASYNC)
+		this._loadMailSummariesAndEmitAsEvents()
 	}
 
 	async _connectWithRetry(configWithListener) {
@@ -76,27 +78,29 @@ class ImapService extends EventEmitter {
 	_doOnNewMail() {
 		// Only react to new mails after the initial load, otherwise it might load the same mails twice.
 		if (this.initialLoadDone) {
-			this._loadMailSummariesAndPublish()
+			this._loadMailSummariesAndEmitAsEvents()
 		}
 	}
 
 	_doAfterInitialLoad() {
 		// During initial load we ignored new incoming emails. In order to catch up with those, we have to refresh
 		// the mails once after the initial load. (async)
-		this._loadMailSummariesAndPublish()
+		this._loadMailSummariesAndEmitAsEvents()
 
 		// If the above trigger on new mails does not work reliable, we have to regularly check
 		// for new mails on the server. This is done only after all the mails have been loaded for the
 		// first time. (Note: set the refresh higher than the time it takes to download the mails).
 		if (this.config.imap.refreshIntervalSeconds) {
 			setInterval(
-				() => this._loadMailSummariesAndPublish(),
+				() => this._loadMailSummariesAndEmitAsEvents(),
 				this.config.imap.refreshIntervalSeconds * 1000
 			)
 		}
 	}
 
-	async _loadMailSummariesAndPublish() {
+	async _loadMailSummariesAndEmitAsEvents() {
+		// UID: Unique id of a message. 
+
 		const uids = await this._getAllUids()
 		const newUids = uids.filter(uid => !this.loadedUids.has(uid))
 
@@ -106,9 +110,9 @@ class ImapService extends EventEmitter {
 		// restart.
 		const uidChunks = _.chunk(newUids, 20)
 
-		// Returning a function. We do not start the search now, we just create the function.
+		// creates an array of functions. We do not start the search now, we just create the function.
 		const fetchFunctions = uidChunks.map(uidChunk => () =>
-			this._getMailHeadersAndPublish(uidChunk)
+			this._getMailHeadersAndEmitAsEvents(uidChunk)
 		)
 
 		await pSeries(fetchFunctions)
@@ -137,11 +141,14 @@ class ImapService extends EventEmitter {
 		await this.connection.deleteMessage(uids)
 		console.log(`deleted ${uids.length} old messages.`)
 
+		
+
 		uids.forEach(uid => this.emit(ImapService.EVENT_DELETED_MAIL, uid))
 	}
 
 	/**
-	 *
+	 * Helper method because ImapSimple#search also fetches each message. We just need the uids here. 
+	 * 
 	 * @param {Object} searchCriteria (see ImapSimple#search)
 	 * @returns {Promise<Array<Int>>} Array of UIDs
 	 * @private
@@ -201,12 +208,13 @@ class ImapService extends EventEmitter {
 	}
 
 	async _getAllUids() {
+		// We ignore mails that are flagged as DELETED, but have not been removed (expunged) yet. 
 		const uids = await this._searchWithoutFetch([['!DELETED']])
-		// Create copy to not mutate the original array
+		// Create copy to not mutate the original array. Sort with newest first (DESC). 
 		return [...uids].sort().reverse()
 	}
 
-	async _getMailHeadersAndPublish(uids) {
+	async _getMailHeadersAndEmitAsEvents(uids) {
 		try {
 			const mails = await this._getMailHeaders(uids)
 			mails.forEach(mail => {
@@ -232,6 +240,7 @@ class ImapService extends EventEmitter {
 	}
 }
 
+// Consumers should use these constants: 
 ImapService.EVENT_NEW_MAIL = 'mail'
 ImapService.EVENT_DELETED_MAIL = 'mailDeleted'
 ImapService.EVENT_INITIAL_LOAD_DONE = 'initial load done'
