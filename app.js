@@ -1,89 +1,50 @@
+#!/usr/bin/env node
 /* eslint unicorn/no-process-exit: 0 */
 
-const path = require('path')
-const http = require('http')
-const express = require('express')
-const logger = require('morgan')
-const Twig = require('twig')
-const compression = require('compression')
-const helmet = require('helmet')
-const socketio = require('socket.io')
+const config = require('./application/config')
 
 // Until node 11 adds flatmap, we use this:
 require('array.prototype.flatmap').shim()
 
-const {sanitizeHtmlTwigFilter} = require('./views/twig-filters')
-const EmailManager = require('./mailbox/email-manager')
-const inboxRouter = require('./routes/inbox')
-const loginRouter = require('./routes/login')
-const ClientNotification = require('./helper/client-notification')
-const config = require('./helper/config')
-
-// Init express middleware
-const app = express()
-app.use(helmet())
-app.use(compression())
-app.set('config', config)
-const server = http.createServer(app)
-const io = socketio(server)
-
-app.set('socketio', io)
-app.use(logger('dev'))
-app.use(express.json())
-app.use(express.urlencoded({extended: false}))
-// View engine setup
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'twig')
-app.set('twig options', {
-	autoescape: true
-})
-
-// Application code:
-app.use(
-	express.static(path.join(__dirname, 'public'), {
-		immutable: true,
-		maxAge: '1h'
-	})
-)
-Twig.extendFilter('sanitizeHtml', sanitizeHtmlTwigFilter)
+const {app, io} = require('./infrastructure/web/web')
+const ClientNotification = require('./infrastructure/web/client-notification')
+const ImapService = require('./application/imap-service')
+const MailProcessingService = require('./application/mail-processing-service')
+const MailRepository = require('./domain/mail-repository')
 
 const clientNotification = new ClientNotification()
 clientNotification.use(io)
 
-const emailManager = new EmailManager(config, clientNotification)
-app.set('emailManager', emailManager)
+const imapService = new ImapService(config)
+const mailProcessingService = new MailProcessingService(
+	new MailRepository(),
+	imapService,
+	clientNotification,
+	config
+)
 
-app.get('/', (req, res, _next) => {
-	res.redirect('/login')
-})
+// Put everything together:
+imapService.on(ImapService.EVENT_NEW_MAIL, mail => mailProcessingService.onNewMail(mail))
+imapService.on(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
+	mailProcessingService.onInitialLoadDone()
+)
+imapService.on(ImapService.EVENT_DELETED_MAIL, mail =>
+	mailProcessingService.onMailDeleted(mail)
+)
 
-app.use('/login', loginRouter)
-app.use('/', inboxRouter)
-
-// Catch 404 and forward to error handler
-app.use((req, res, next) => {
-	next({message: 'page not found', status: 404})
-})
-
-// Error handler
-app.use((err, req, res, _next) => {
-	// Set locals, only providing error in development
-	res.locals.message = err.message
-	res.locals.error = req.app.get('env') === 'development' ? err : {}
-
-	// Render the error page
-	res.status(err.status || 500)
-	res.render('error')
-})
-
-emailManager.connectImapAndAutorefresh().catch(error => {
-	console.error('fatal error from email manager', error)
-	return process.exit(1)
-})
-
-emailManager.on('error', err => {
-	console.error('error from emailManager, stopping.', err)
+mailProcessingService.on('error', err => {
+	console.error('error from mailProcessingService, stopping.', err)
 	process.exit(1)
 })
 
-module.exports = {app, server}
+imapService.on(ImapService.EVENT_ERROR, error => {
+	console.error('fatal error from imap service', error)
+	process.exit(1)
+})
+
+app.set('mailProcessingService', mailProcessingService)
+
+imapService.connectAndLoadMessages().catch(error => {
+	console.error('fatal error from imap service', error)
+	process.exit(1)
+})
