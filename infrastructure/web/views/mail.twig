@@ -2,19 +2,27 @@
 
 {% block body %}
     <script>
-        enableNewMessageNotifications('{{ address }}',false)
+        enableNewMessageNotifications('{{ address }}', false)
     </script>
 
-    <a href="/{{ address }}"> ← Return to inbox</a>
-    <div style="float: right"><a href="/login"> logout</a></div>
+    <a href="/{{ address }}">
+        ← Return to inbox</a>
+    <div style="float: right">
+        <a href="/login">
+            logout</a>
+    </div>
     <h1>{{ mail.subject }}</h1>
     <h3>{{ mail.from.text }}</h3>
     <h3>{{ mail.date| date }}</h3>
     <hr>
     {% if mail.html %}
-        <div class="mail_body"> {{ mail.html|sanitizeHtml|raw }}</div>
+        <div class="mail_body">
+            {{ mail.html|sanitizeHtml|raw }}</div>
+    {% elseif mail.textAsHtml %}
+        <div class="mail_body">
+            {{ mail.textAsHtml|sanitizeHtml|raw }}</div>
     {% else %}
-        <div class="mail_body"> {{ mail.textAsHtml|sanitizeHtml|raw }}</div>
+        <div class="mail_body"></div>
     {% endif %}
 
 
