@@ -1,5 +1,6 @@
 const path = require('path')
 const http = require('http')
+const debug = require('debug')('voidmail:server')
 const express = require('express')
 const logger = require('morgan')
 const Twig = require('twig')
@@ -7,11 +8,10 @@ const compression = require('compression')
 const helmet = require('helmet')
 const socketio = require('socket.io')
 
-const {sanitizeHtmlTwigFilter} = require('./views/twig-filters')
+const config = require('../../application/config')
 const inboxRouter = require('./routes/inbox')
 const loginRouter = require('./routes/login')
-const debug = require('debug')('voidmail:server')
-const config = require('../../application/config')
+const {sanitizeHtmlTwigFilter} = require('./views/twig-filters')
 
 // Init express middleware
 const app = express()
