@@ -34,11 +34,11 @@ Requires [Node.js 10](https://nodejs.org).
     open http://localhost:3000
     
 
-# Process monitoring and startup
+# Self-Hosted: Process monitoring and startup
 Usually, you want this program to run as a service, wich can restart itself in case of crashing, and on every reboot.
-This is possible vía pm2, the nodejs process manager.
+This is possible vía [pm2, the nodejs process manager](http://pm2.keymetrics.io/).
 
-1. Run the program using some pm2 flags. You can name processes, i used `--name email`. The `--watch` option restarts the app when dies for any reason.
+1. Run the program using some pm2 flags. You can name processes, I used `--name email`. The `--watch` option restarts the app when dies for any reason.
 ```
 cd void-mail
 pm2 --name email start npm -- start --watch
@@ -50,6 +50,6 @@ pm2 --name email start npm -- start --watch
 3. Make your system to run it on boot/reboot. You can run it with sudo directly.
 `pm2 startup`
 
-4. Once you did this, you can try bot things.
+4. Once you did this, you can try to reboot things.
 - Reboot your system and check if void-mail gets started. (`reboot`)
 - Kill node app instance and see if gets respawned (ie `kill -9 ``pgrep node`` `)
