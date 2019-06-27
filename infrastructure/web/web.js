@@ -74,37 +74,10 @@ app.set('port', config.http.port)
  * Listen on provided port, on all network interfaces.
  */
 server.listen(config.http.port)
-server.on('error', onError)
 server.on('listening', () => {
 	const addr = server.address()
 	const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port
 	debug('Listening on ' + bind)
 })
 
-/**
- * Event listener for HTTP server "error" event.
- */
-function onError(error) {
-	if (error.syscall !== 'listen') {
-		throw error
-	}
-
-	const bind =
-		typeof config.http.port === 'string'
-			? 'Pipe ' + config.http.port
-			: 'Port ' + config.http.port
-
-	// Handle specific listen errors with friendly messages
-	switch (error.code) {
-		case 'EACCES':
-			console.error(bind + ' requires elevated privileges')
-			process.exit(1)
-		case 'EADDRINUSE':
-			console.error(bind + ' is already in use')
-			process.exit(1)
-		default:
-			throw error
-	}
-}
-
-module.exports = {app, io}
+module.exports = {app, io, server}
