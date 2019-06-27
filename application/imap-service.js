@@ -10,9 +10,9 @@ const Mail = require('../domain/mail')
 
 /**
  * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
- * as a member field. 
- * 
- * With this abstraction it would be easy to replace this with any inbound mail service like mailgun.com. 
+ * as a member field.
+ *
+ * With this abstraction it would be easy to replace this with any inbound mail service like mailgun.com.
  */
 class ImapService extends EventEmitter {
 	constructor(config) {
@@ -99,7 +99,7 @@ class ImapService extends EventEmitter {
 	}
 
 	async _loadMailSummariesAndEmitAsEvents() {
-		// UID: Unique id of a message. 
+		// UID: Unique id of a message.
 
 		const uids = await this._getAllUids()
 		const newUids = uids.filter(uid => !this.loadedUids.has(uid))
@@ -110,7 +110,7 @@ class ImapService extends EventEmitter {
 		// restart.
 		const uidChunks = _.chunk(newUids, 20)
 
-		// creates an array of functions. We do not start the search now, we just create the function.
+		// Creates an array of functions. We do not start the search now, we just create the function.
 		const fetchFunctions = uidChunks.map(uidChunk => () =>
 			this._getMailHeadersAndEmitAsEvents(uidChunk)
 		)
@@ -141,14 +141,12 @@ class ImapService extends EventEmitter {
 		await this.connection.deleteMessage(uids)
 		console.log(`deleted ${uids.length} old messages.`)
 
-		
-
 		uids.forEach(uid => this.emit(ImapService.EVENT_DELETED_MAIL, uid))
 	}
 
 	/**
-	 * Helper method because ImapSimple#search also fetches each message. We just need the uids here. 
-	 * 
+	 * Helper method because ImapSimple#search also fetches each message. We just need the uids here.
+	 *
 	 * @param {Object} searchCriteria (see ImapSimple#search)
 	 * @returns {Promise<Array<Int>>} Array of UIDs
 	 * @private
@@ -208,9 +206,9 @@ class ImapService extends EventEmitter {
 	}
 
 	async _getAllUids() {
-		// We ignore mails that are flagged as DELETED, but have not been removed (expunged) yet. 
+		// We ignore mails that are flagged as DELETED, but have not been removed (expunged) yet.
 		const uids = await this._searchWithoutFetch([['!DELETED']])
-		// Create copy to not mutate the original array. Sort with newest first (DESC). 
+		// Create copy to not mutate the original array. Sort with newest first (DESC).
 		return [...uids].sort().reverse()
 	}
 
@@ -219,10 +217,10 @@ class ImapService extends EventEmitter {
 			const mails = await this._getMailHeaders(uids)
 			mails.forEach(mail => {
 				this.loadedUids.add(mail.attributes.uid)
-				return this.emit(
-					ImapService.EVENT_NEW_MAIL,
-					this._createMailSummary(mail)
-				)
+				// Some broadcast messages have no TO field. We have to ignore those messages.
+				if (mail.parts[0].body.to) {
+					this.emit(ImapService.EVENT_NEW_MAIL, this._createMailSummary(mail))
+				}
 			})
 		} catch (error) {
 			debug('can not fetch', error)
@@ -240,7 +238,7 @@ class ImapService extends EventEmitter {
 	}
 }
 
-// Consumers should use these constants: 
+// Consumers should use these constants:
 ImapService.EVENT_NEW_MAIL = 'mail'
 ImapService.EVENT_DELETED_MAIL = 'mailDeleted'
 ImapService.EVENT_INITIAL_LOAD_DONE = 'initial load done'
