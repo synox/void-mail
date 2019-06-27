@@ -24,7 +24,9 @@ const mailProcessingService = new MailProcessingService(
 )
 
 // Put everything together:
-imapService.on(ImapService.EVENT_NEW_MAIL, mail => mailProcessingService.onNewMail(mail))
+imapService.on(ImapService.EVENT_NEW_MAIL, mail =>
+	mailProcessingService.onNewMail(mail)
+)
 imapService.on(ImapService.EVENT_INITIAL_LOAD_DONE, () =>
 	mailProcessingService.onInitialLoadDone()
 )
