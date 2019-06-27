@@ -6,7 +6,7 @@ const config = require('./application/config')
 // Until node 11 adds flatmap, we use this:
 require('array.prototype.flatmap').shim()
 
-const { app, io, server } = require('./infrastructure/web/web')
+const {app, io, server} = require('./infrastructure/web/web')
 const ClientNotification = require('./infrastructure/web/client-notification')
 const ImapService = require('./application/imap-service')
 const MailProcessingService = require('./application/mail-processing-service')
@@ -51,7 +51,6 @@ imapService.connectAndLoadMessages().catch(error => {
 	process.exit(1)
 })
 
-
 server.on('error', error => {
 	if (error.syscall !== 'listen') {
 		console.error('fatal web server error', error)
@@ -61,7 +60,9 @@ server.on('error', error => {
 	// Handle specific listen errors with friendly messages
 	switch (error.code) {
 		case 'EACCES':
-			console.error('Port ' + config.http.port + ' requires elevated privileges')
+			console.error(
+				'Port ' + config.http.port + ' requires elevated privileges'
+			)
 			process.exit(1)
 		case 'EADDRINUSE':
 			console.error('Port ' + config.http.port + ' is already in use')
@@ -70,6 +71,4 @@ server.on('error', error => {
 			console.error('fatal web server error', error)
 			process.exit(1)
 	}
-}
-)
-
+})
