@@ -19,7 +19,7 @@ const Mail = require('../domain/mail')
  * @returns {undefined|Promise} Returns a promise when no callback is specified, resolving when the action succeeds.
  * @memberof ImapSimple
  */
-imaps.prototype.deleteMessage = function (uid, callback) {
+imaps.ImapSimple.prototype.deleteMessage = function (uid, callback) {
     var self = this;
 
     if (callback) {
@@ -53,7 +53,7 @@ imaps.prototype.deleteMessage = function (uid, callback) {
  * @returns {undefined|Promise} Returns a promise when no callback is specified, resolving to `boxName`
  * @memberof ImapSimple
  */
-imaps.prototype.closeBox = function (autoExpunge=true, callback) {
+imaps.ImapSimple.prototype.closeBox = function (autoExpunge=true, callback) {
     var self = this;
 
     if (typeof(autoExpunge) == 'function'){
