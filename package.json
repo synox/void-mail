@@ -16,7 +16,7 @@
     "express-validator": "^5.3.1",
     "helmet": "^3.16.0",
     "http-errors": "~1.6.2",
-    "imap-simple": "synox/imap-simple#feature/delete",
+    "imap-simple": "^4.3.0",
     "lodash": "^4.17.11",
     "mailparser": "^2.4.3",
     "mem": "^4.2.0",

@@ -8,6 +8,78 @@ const debug = require('debug')('void-mail:imap')
 const _ = require('lodash')
 const Mail = require('../domain/mail')
 
+
+// Just adding some missing functions to imap-simple... :-)
+
+/**
+ * Deletes the specified message(s).
+ *
+ * @param {string|Array} uid The uid or array of uids indicating the messages to be deleted
+ * @param {function} [callback] Optional callback, receiving signature (err)
+ * @returns {undefined|Promise} Returns a promise when no callback is specified, resolving when the action succeeds.
+ * @memberof ImapSimple
+ */
+ImapSimple.prototype.deleteMessage = function (uid, callback) {
+    var self = this;
+
+    if (callback) {
+        return nodeify(self.deleteMessage(uid), callback);
+    }
+
+    return new Promise(function (resolve, reject) {
+        self.imap.addFlags(uid, '\\Deleted', function (err) {
+            if (err) {
+                reject(err);
+                return;
+            }
+            self.imap.expunge( function (err) {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                resolve();
+            });
+        });
+    });
+};
+
+
+
+/**
+ * Close a mailbox
+ *
+ * @param {boolean} [autoExpunge=true] If autoExpunge is true, any messages marked as Deleted in the currently open mailbox will be remove
+ * @param {function} [callback] Optional callback, receiving signature (err)
+ * @returns {undefined|Promise} Returns a promise when no callback is specified, resolving to `boxName`
+ * @memberof ImapSimple
+ */
+ImapSimple.prototype.closeBox = function (autoExpunge=true, callback) {
+    var self = this;
+
+    if (typeof(autoExpunge) == 'function'){
+        callback = autoExpunge;
+        autoExpunge = true;
+    }
+
+    if (callback) {
+        return nodeify(this.closeBox(autoExpunge), callback);
+    }
+
+    return new Promise(function (resolve, reject) {
+
+        self.imap.closeBox(autoExpunge, function (err, result) {
+
+            if (err) {
+                reject(err);
+                return;
+            }
+
+            resolve(result);
+        });
+    });
+};
+
+
 /**
  * Fetches emails from the imap server. It is a facade against the more complicated imap-simple api. It keeps the connection
  * as a member field.
