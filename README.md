@@ -76,3 +76,7 @@ Maybe Later:
 ## License
 
 GPL-3.0 © [Aravindo Wingeier](https://github.com/synox)
+
+[![BrowserStack](https://d2ogrdw2mh0rsl.cloudfront.net/production/images/static/header/header-logo.svg)](https://www.browserstack.com/)	
+
+Supported by [BrowserStack](https://www.browserstack.com/), which allows us to test projects online with any browser as a service. :-) 	
