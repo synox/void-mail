@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+  void-mail:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DOMAIN: example.com
+      IMAP_SERVER: mail.example.com
+      IMAP_USER: void@example.com
+      IMAP_PASSWORD: changemehard
+      DELETE_MAILS_OLDER_THAN_DAYS: 30
+      

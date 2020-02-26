@@ -62,7 +62,7 @@ Testing:
 Maybe Later:
 - support multiple domains
 - support delete
-- docker deployment
+- ~~docker deployment~~
 - reduce code base, if possible    
     http://ignorethecode.net/blog/2010/02/02/removing-features/
 
