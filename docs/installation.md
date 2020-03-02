@@ -53,3 +53,23 @@ pm2 --name email start npm -- start --watch
 4. Once you did this, you can try to reboot things.
 - Reboot your system and check if void-mail gets started. (`reboot`)
 - Kill node app instance and see if gets respawned (ie `kill -9 ``pgrep node`` `)
+
+# Self-Hosted: docker / docker-compose
+
+1. clone this repository
+
+```
+git clone https://github.com/synox/void-mail.git
+```
+
+2. change docker-compose.yml accordingly to your needs
+
+```
+vi docker-compose.yml
+```
+
+3. run it
+   
+```
+docker-compose up -d
+```
