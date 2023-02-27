@@ -13,6 +13,13 @@
 [![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/xojs/xo)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fsynox%2Fvoid-mail?ref=badge_shield)
 
+# Project status: Abandoned
+
+This code is not maintained any more, this is a read-only archive. 
+
+Why? I found that https://forwardemail.net and [Apple's What is Hide My Email?
+](https://support.apple.com/en-us/HT210425) solve my use cases and are much more convenient. 
+
 # How it works
 You need a domain with [catch-all-mailbox](https://www.google.ch/search?q=how+to+setup+catch-all+imap+mailbox) and an imap account. 
 
